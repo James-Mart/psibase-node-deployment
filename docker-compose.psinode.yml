@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  psinode:
+    image: "${PSINODE_IMAGE}"
+    user: root
+    ports:
+      - '8080:8080'
+    ulimits:
+      memlock: -1
+    command: ["psinode_db"]
+    environment:
+      - HOST=${HOST}
+      - PRODUCER_NAME=${PRODUCER_NAME}
+      - ADMIN_HOST=${ADMIN_HOST}
+      - DB_CACHE_SIZE=${DB_CACHE_SIZE}
+    volumes:
+      - type: volume
+        source: psinode-volume
+        target: /root/
+      - type: bind
+        source: ./psinode/psinode_db/config
+        target: /root/psibase/psinode_db/config
+    networks:
+      - psibase_net
+
+volumes:
+  psinode-volume:
+
+networks:
+  psibase_net:
+    driver: bridge 
