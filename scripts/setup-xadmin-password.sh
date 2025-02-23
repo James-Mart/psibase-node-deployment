@@ -9,4 +9,4 @@ sudo apt-get install -y apache2-utils
 
 read -p "Enter username for x-admin: " username
 
-htpasswd -c "$WORKSPACE_ROOT/nginx-conf/.htpasswd" "$username"
+htpasswd -c "$WORKSPACE_ROOT/nginx/.htpasswd" "$username"
