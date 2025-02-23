@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "initialize git",
+            "type": "shell",
+            "command": "eval \"$(ssh-agent -s)\" && ssh-add ~/.ssh/gh_key",
+            "options": {
+                "statusbar": {
+                  "label": "$(tools) Initialize git"
+                }
+              }
+        }
+    ]
+}
