@@ -5,15 +5,16 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - ./nginx/psinode.conf.template:/etc/nginx/templates/psinode.conf.template
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/psinode.conf.conf:/etc/nginx/templates/psinode.conf.conf
+      - ./nginx/nginx.conf.conf:/etc/nginx/nginx.conf.conf
       - ./nginx/ffdhe2048.txt:/etc/nginx/dhparam/ffdhe2048.txt
-      - ./nginx/.htpasswd:/etc/nginx/.htpasswd
+      - ./secrets/.htpasswd:/etc/nginx/.htpasswd
       - ./letsencrypt/certs:/letsencrypt/certs
     environment:
       - NGINX_HOST=${HOST}
       - STACK_DEPLOY_NAME=${STACK_DEPLOY_NAME}
       - ADMIN_HOST=${ADMIN_HOST}
+      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf
     networks:
       - psibase_net
 

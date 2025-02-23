@@ -6,7 +6,7 @@ services:
       - '8080:8080'
     ulimits:
       memlock: -1
-    command: ["psinode_db"]
+    command: ["db -p ${PRODUCER_NAME} -o ${HOST} -l 8080 --p2p --admin-authz=rw:ip:${MY_IP} --database-cache-size=${DB_CACHE_SIZE}"]
     environment:
       - HOST=${HOST}
       - PRODUCER_NAME=${PRODUCER_NAME}
