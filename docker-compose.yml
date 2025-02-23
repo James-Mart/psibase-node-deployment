@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  psinode:
+    image: "${PSINODE_IMAGE}"
+    user: root
+    ports:
+      - '8080:8080'
+    ulimits:
+      memlock: -1
+    command: ["psinode_db"]
+    environment:
+      - HOST=${HOST}
+      - PRODUCER_NAME=${PRODUCER_NAME}
+      - ADMIN_HOST=${ADMIN_HOST}
+      - DB_CACHE_SIZE=${DB_CACHE_SIZE}
+    volumes:
+      - type: volume
+        source: psinode-volume
+        target: /root/
+      - type: bind
+        source: ./psinode/psinode_db/config
+        target: /root/psibase/psinode_db/config
+    networks:
+      - psibase_net
+  proxy:
+    image: "nginx:1.23"
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/psinode.conf.template:/etc/nginx/templates/psinode.conf.template
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ffdhe2048.txt:/etc/nginx/dhparam/ffdhe2048.txt
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd
+      - ./letsencrypt/certs:/letsencrypt/certs
+    environment:
+      - NGINX_HOST=${HOST}
+      - STACK_DEPLOY_NAME=${STACK_DEPLOY_NAME}
+      - ADMIN_HOST=${ADMIN_HOST}
+    networks:
+      - psibase_net
+volumes:
+  psinode-volume:
+
+networks:
+  psibase_net:
+    driver: bridge
