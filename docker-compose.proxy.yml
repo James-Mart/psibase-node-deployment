@@ -5,11 +5,15 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - ./nginx/psinode.conf.conf:/etc/nginx/templates/psinode.conf.conf
-      - ./nginx/nginx.conf.conf:/etc/nginx/nginx.conf.conf
-      - ./nginx/ffdhe2048.txt:/etc/nginx/dhparam/ffdhe2048.txt
-      - ./secrets/.htpasswd:/etc/nginx/.htpasswd
-      - ./letsencrypt/certs:/letsencrypt/certs
+      - type: bind
+        source: ./nginx/
+        target: /etc/nginx/
+      - type: bind
+        source: ./secrets/.htpasswd
+        target: /etc/nginx/.htpasswd
+      - type: volume
+        source: letsencrypt-certs-volume
+        target: /letsencrypt/certs
     environment:
       - NGINX_HOST=${HOST}
       - STACK_DEPLOY_NAME=${STACK_DEPLOY_NAME}
