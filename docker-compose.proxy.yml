@@ -8,9 +8,6 @@ services:
       - type: bind
         source: ./nginx/
         target: /etc/nginx/
-      - type: bind
-        source: ./secrets/.htpasswd
-        target: /etc/nginx/.htpasswd
       - type: volume
         source: letsencrypt-certs-volume
         target: /letsencrypt/certs
