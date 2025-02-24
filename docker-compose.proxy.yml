@@ -13,7 +13,6 @@ services:
         target: /letsencrypt/certs
     environment:
       - HOST=${HOST}
-      - ADMIN_HOST=${ADMIN_HOST}
       - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf
     networks:
       - psibase_net
