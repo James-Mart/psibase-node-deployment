@@ -23,13 +23,13 @@ docker tag ghcr.io/alexzorin/certbot-dns-multi:latest certbot
 # Run certbot with dns-multi plugin
 docker run -it --rm \
     --name certbot \
-    -v "$SCRIPT_DIR/../letsencrypt/certs:/etc/letsencrypt" \
     -v "$SCRIPT_DIR/../iwantmyname-dns-multi.ini:/etc/letsencrypt/dns-multi.ini" \
     -v "$SCRIPT_DIR/../secrets/iwantmyname_username:/run/secrets/iwantmyname_username:ro" \
     -v "$SCRIPT_DIR/../secrets/iwantmyname_password:/run/secrets/iwantmyname_password:ro" \
-    certbot certonly \
+    certbot -v certonly \
     -n \
     --agree-tos \
+    --email $CERTBOT_EMAIL \
     -d $HOST,*.$HOST \
     --keep-until-expiring \
     --expand \

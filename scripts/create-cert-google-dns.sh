@@ -16,11 +16,16 @@ SCRIPT_DIR="$(dirname "$0")"
 set -a
 source "$SCRIPT_DIR/../.env"
 
+GOOGLE_DNS_CREDS_FILE_NAME="" #  e.g. google-dns-cred.json
+if [ "$GOOGLE_DNS_CREDS_FILE_NAME" = "" ]; then
+    echo "Error: GOOGLE_DNS_CREDS_FILE_NAME not set."
+    exit 1
+fi
+
 docker pull certbot/dns-google:latest
 docker tag certbot/dns-google:latest certbot
 docker run -it --rm \
     --name certbot \
-    -v "$SCRIPT_DIR/../letsencrypt/certs:/etc/letsencrypt" \
     -v "$SCRIPT_DIR/../secrets/$GOOGLE_DNS_CREDS_FILE_NAME:/.secrets/certbot/$GOOGLE_DNS_CREDS_FILE_NAME" \
     certbot certonly \
     -n \
