@@ -6,12 +6,16 @@ services:
       - '8080:8080'
     ulimits:
       memlock: -1
-    command: ["db -p ${PRODUCER_NAME} -o ${HOST} -l 8080 --p2p --admin-authz=rw:ip:${MY_IP} --database-cache-size=${DB_CACHE_SIZE}"]
-    environment:
-      - HOST=${HOST}
-      - PRODUCER_NAME=${PRODUCER_NAME}
-      - ADMIN_HOST=${ADMIN_HOST}
-      - DB_CACHE_SIZE=${DB_CACHE_SIZE}
+    command: [
+      "db",
+      "-p", "${PRODUCER_NAME}",
+      "-o", "${HOST}",
+      "-l", "8080",
+      "--p2p",
+      "--admin-authz=rw:ip:${MY_IP}",
+      "--database-cache-size=${DB_CACHE_SIZE}",
+      "--pkcs11-module=/usr/lib/softhsm/libsofthsm2.so"
+    ]
     volumes:
       - type: volume
         source: psinode-volume

@@ -15,8 +15,7 @@ services:
         source: letsencrypt-certs-volume
         target: /letsencrypt/certs
     environment:
-      - NGINX_HOST=${HOST}
-      - STACK_DEPLOY_NAME=${STACK_DEPLOY_NAME}
+      - HOST=${HOST}
       - ADMIN_HOST=${ADMIN_HOST}
       - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf
     networks:
