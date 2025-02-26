@@ -4,7 +4,7 @@
         {
             "label": "initialize git",
             "type": "shell",
-            "command": "eval \"$(ssh-agent -s)\" && ssh-add ~/.ssh/gh_key",
+            "command": "${workspaceFolder}/.scripts/initialize-git.sh",
             "options": {
                 "statusbar": {
                   "label": "$(tools) Initialize git"
@@ -14,7 +14,7 @@
         {
             "label": "restart compose",
             "type": "shell",
-            "command": "docker compose down --remove-orphans && docker compose up -d",
+            "command": "${workspaceFolder}/.scripts/restart-compose.sh",
             "options": {
                 "statusbar": {
                     "label": "$(refresh) Restart Compose"
