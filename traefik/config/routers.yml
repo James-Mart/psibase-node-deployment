@@ -7,9 +7,7 @@ tlsCommon: &tlsCommon
 http:
   routers:
     psinode:
-      rule: >-
-        {{- $host := env "HOST" -}}
-        Host(`{{$host}}`) || (Host(`*.{{$host}}`) && !Host(`x-admin.{{$host}}`) && !Host(`x-traefik.{{$host}}`))
+      rule: Host(`{{ env "HOST" }}`) || (Host(`*.{{ env "HOST" }}`) && !Host(`x-admin.{{ env "HOST" }}`) && !Host(`x-traefik.{{ env "HOST" }}`))
       service: "psinode"
       entryPoints:
         - web
