@@ -6,6 +6,7 @@ services:
       - '8090:8090'
     ulimits:
       memlock: -1
+    entrypoint: ["/root/psinode-init.sh"]
     command: [
       "db",
       "-p", "${PRODUCER_NAME}",
@@ -16,10 +17,13 @@ services:
       "--database-cache-size=${DB_CACHE_SIZE}",
       "--pkcs11-module=/usr/lib/softhsm/libsofthsm2.so"
     ]
+    environment:
+      - NEW_PIN=${SOFTHSM_PIN}
     volumes:
       - psinode-volume:/root/
       - softhsm-keys:/var/lib/softhsm/tokens
       - ./traefik/auth:/etc/traefik/auth:ro
+      - ./psinode-init.sh:/root/psinode-init.sh:ro
     networks:
       - psibase_net
 

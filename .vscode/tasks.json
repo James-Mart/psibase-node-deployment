@@ -14,7 +14,7 @@
         {
             "label": "restart compose",
             "type": "shell",
-            "command": "docker compose down && docker compose up -d",
+            "command": "docker compose down --remove-orphans && docker compose up -d",
             "options": {
                 "statusbar": {
                     "label": "$(refresh) Restart Compose"
