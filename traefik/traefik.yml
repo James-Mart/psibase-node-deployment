@@ -56,7 +56,6 @@ http:
 certificatesResolvers:
   cloudflare:
     acme:
-      email: "j.mart.x93@gmail.com"
       storage: "/etc/traefik/acme/acme.json"
       dnsChallenge:
         provider: cloudflare

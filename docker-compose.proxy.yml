@@ -6,6 +6,7 @@ services:
       - "443:443"
     environment:
       - "CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_API_TOKEN}"
+      - "TRAEFIK_CERTIFICATESRESOLVERS_CLOUDFLARE_ACME_EMAIL=${EMAIL}"
       - "HOST=${HOST}"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
