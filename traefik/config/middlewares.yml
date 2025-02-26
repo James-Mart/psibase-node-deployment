@@ -1,0 +1,22 @@
+http:
+  middlewares:
+    security-headers:
+      headers:
+        sslRedirect: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 63072000
+    
+    psinode-headers:
+      headers:
+        customRequestHeaders:
+          Connection: "Upgrade"
+    
+    psinode-rewrite:
+      redirectRegex:
+        regex: "^http://([^/:]+)(:[0-9]+)?/(.*)$$"
+        replacement: "https://${1}/${3}"
+        
+    admin-auth:
+      basicAuth:
+        usersFile: "/etc/traefik/auth/users" 

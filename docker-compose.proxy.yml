@@ -6,15 +6,9 @@ services:
       - "443:443"
     environment:
       - "CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_API_TOKEN}"
+      - "HOST=${HOST}"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock" # TODO: append :ro
-      - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
-      - type: bind
-        source: ./traefik/acme
-        target: /etc/traefik/acme
-      - type: bind
-        source: ./traefik/auth
-        target: /etc/traefik/auth
-        read_only: true
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik:/etc/traefik:ro"
     networks:
       - psibase_net

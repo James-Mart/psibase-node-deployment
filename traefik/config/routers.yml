@@ -1,0 +1,43 @@
+http:
+  routers:
+    psinode:
+      rule: Host(`{{ env "HOST" }}`) || (Host(`*.{{ env "HOST" }}`) && !Host(`x-admin.{{ env "HOST" }}`) && !Host(`x-traefik.{{ env "HOST" }}`))
+      service: "psinode"
+      entryPoints:
+        - web
+        - websecure
+      middlewares:
+        - security-headers
+        - psinode-headers
+        - psinode-rewrite
+      tls:
+        certResolver: cloudflare
+
+    admin:
+      rule: Host(`x-admin.{{ env "HOST" }}`)
+      service: "psinode"
+      entryPoints:
+        - websecure
+      middlewares:
+        - security-headers
+        - admin-auth
+      tls:
+        certResolver: cloudflare
+        
+    dashboard:
+      rule: Host(`x-traefik.{{ env "HOST" }}`)
+      service: "api@internal"
+      entryPoints:
+        - websecure
+      middlewares:
+        - admin-auth
+        - security-headers
+      tls:
+        certResolver: cloudflare
+
+  services:
+    psinode:
+      loadBalancer:
+        servers:
+          - url: "http://psinode:8090"
+        passHostHeader: true 

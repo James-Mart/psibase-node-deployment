@@ -1,14 +1,19 @@
 api:
   insecure: false
+  dashboard: true
 
 log:
-  level: DEBUG
+  level: WARN
   format: json
 
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     network: psibase_net
+  
+  file:
+    directory: "/etc/traefik/config"
+    watch: true
 
 entryPoints:
   web:
@@ -19,6 +24,34 @@ entryPoints:
           to: websecure
   websecure:
     address: ":443"
+
+http:
+  middlewares:
+    security-headers:
+      headers:
+        sslRedirect: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 63072000
+    
+    psinode-headers:
+      headers:
+        customRequestHeaders:
+          Connection: "Upgrade"
+    
+    psinode-rewrite:
+      redirectRegex:
+        regex: "^http://([^/:]+)(:[0-9]+)?/(.*)$$"
+        replacement: "https://${1}/${3}"
+        
+    admin-auth:
+      basicAuth:
+        usersFile: "/etc/traefik/auth/users"
+  
+  tls:
+    options:
+      default:
+        minVersion: "VersionTLS12"
 
 certificatesResolvers:
   cloudflare:
