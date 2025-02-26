@@ -4,3 +4,6 @@ traefik/acme/
 
 # Environment variables
 .env
+
+# Logs
+*.log
