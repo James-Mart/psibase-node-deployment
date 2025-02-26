@@ -9,6 +9,9 @@ services:
       - "HOST=${HOST}"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik:/etc/traefik:ro"
+      - "./traefik/acme:/etc/traefik/acme" # needs to be rw, otherwise cert issuance fails
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./traefik/config:/etc/traefik/config:ro"
+      - "./traefik/auth:/etc/traefik/auth:ro"
     networks:
       - psibase_net

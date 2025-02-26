@@ -12,6 +12,9 @@ http:
         - psinode-rewrite
       tls:
         certResolver: cloudflare
+        domains:
+          - main: "{{ env "HOST" }}"
+            sans: ["*.{{ env "HOST" }}"]
 
     admin:
       rule: Host(`x-admin.{{ env "HOST" }}`)
@@ -23,6 +26,9 @@ http:
         - admin-auth
       tls:
         certResolver: cloudflare
+        domains:
+          - main: "{{ env "HOST" }}"
+            sans: ["*.{{ env "HOST" }}"]
         
     dashboard:
       rule: Host(`x-traefik.{{ env "HOST" }}`)
@@ -34,6 +40,9 @@ http:
         - security-headers
       tls:
         certResolver: cloudflare
+        domains:
+          - main: "{{ env "HOST" }}"
+            sans: ["*.{{ env "HOST" }}"]
 
   services:
     psinode:
