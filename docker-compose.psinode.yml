@@ -3,7 +3,7 @@ services:
     image: "${PSINODE_IMAGE}"
     user: root
     ports:
-      - '8080:8080'
+      - '8090:8090'
     ulimits:
       memlock: -1
     command: [
@@ -11,7 +11,9 @@ services:
       "-p", "${PRODUCER_NAME}",
       "-o", "${HOST}",
       "--p2p",
+      "-l", "8090",
       "--admin-authz=rw:ip:${MY_IP}",
+      "--admin-authz=rw:any",
       "--database-cache-size=${DB_CACHE_SIZE}",
       "--pkcs11-module=/usr/lib/softhsm/libsofthsm2.so"
     ]
@@ -23,14 +25,53 @@ services:
         source: softhsm-keys
         target: /var/lib/softhsm/tokens
       - type: bind
-        source: ./psinode/psinode_db/config
-        target: /root/psibase/psinode_db/config
+        source: ./traefik/auth
+        target: /etc/traefik/auth
+        read_only: true
     networks:
       - psibase_net
+    labels:
+      # Psinode router
+      - "traefik.http.routers.psinode.rule=Host(`${HOST}`) || (Host(`*.${HOST}`) && !Host(`x-admin.${HOST}`))"
+      - "traefik.http.routers.psinode.entrypoints=websecure"
+      - "traefik.http.routers.psinode.tls=true"
+      - "traefik.http.routers.psinode.tls.certresolver=cloudflare"
+      - "traefik.http.routers.psinode.tls.domains[0].main=${HOST}"
+      - "traefik.http.routers.psinode.tls.domains[0].sans=*.${HOST}"
+      - "traefik.http.routers.psinode.tls.options=default"
+      - "traefik.http.routers.psinode.middlewares=security-headers,psinode-headers,psinode-rewrite"
+      - "traefik.http.routers.psinode.service=psinode-service"
+      
+      # Admin subdomain router with basic auth
+      - "traefik.http.routers.admin.rule=Host(`x-admin.${HOST}`)"
+      - "traefik.http.routers.admin.entrypoints=websecure"
+      - "traefik.http.routers.admin.tls=true"
+      - "traefik.http.routers.admin.tls.certresolver=cloudflare"
+      - "traefik.http.routers.admin.middlewares=security-headers,psinode-headers,psinode-rewrite,admin-auth"
+      - "traefik.http.routers.admin.service=admin-service"
+      
+      # Create a separate service for admin
+      - "traefik.http.services.admin-service.loadbalancer.server.port=8090"
+      
+      # Admin basic auth middleware
+      - "traefik.http.middlewares.admin-auth.basicauth.usersfile=/etc/traefik/auth/users"
+
+      # Middlewares
+      - "traefik.http.middlewares.security-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.security-headers.headers.stsSeconds=63072000"
+      
+      # Headers matching Nginx configuration
+      - "traefik.http.services.psinode-service.loadbalancer.passHostHeader=true"
+      - "traefik.http.middlewares.psinode-headers.headers.customrequestheaders.Connection=Upgrade"
+      
+      - "traefik.http.middlewares.psinode-rewrite.redirectregex.regex=^http://([^/:]+)(:[0-9]+)?/(.*)$$"
+      - "traefik.http.middlewares.psinode-rewrite.redirectregex.replacement=https://$${1}/$${3}"
+
+      # Services
+      - "traefik.http.services.psinode-service.loadbalancer.server.port=8090"
 
 volumes:
   psinode-volume:
-
-networks:
-  psibase_net:
-    driver: bridge 
+  softhsm-keys:

@@ -1,0 +1,9 @@
+---
+description: How to use docker compose
+globs: 
+alwaysApply: true
+---
+
+# Newer syntax
+
+Always use `docker compose` and never use `docker-compose`.

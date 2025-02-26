@@ -4,4 +4,5 @@ include:
 
 networks:
   psibase_net:
+    name: psibase_net
     driver: bridge

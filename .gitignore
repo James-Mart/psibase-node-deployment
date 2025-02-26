@@ -1,6 +1,5 @@
-*.log
-notes.md
 .env
-*cred.json
-image-builders
-*psinode_db*
+
+# Traefik sensitive directories
+traefik/auth/
+traefik/acme/

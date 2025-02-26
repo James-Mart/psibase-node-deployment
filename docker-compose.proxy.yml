@@ -1,22 +1,20 @@
 services:
-  proxy:
-    image: "nginx:1.27"
+  reverse-proxy:
+    image: traefik:v3.3
     ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - type: bind
-        source: ./nginx/
-        target: /etc/nginx/
-      - type: volume
-        source: letsencrypt-certs-volume
-        target: /letsencrypt/certs
+      - "80:80"
+      - "443:443"
     environment:
-      - HOST=${HOST}
-      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf
+      - "CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_API_TOKEN}"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock" # TODO: append :ro
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - type: bind
+        source: ./traefik/acme
+        target: /etc/traefik/acme
+      - type: bind
+        source: ./traefik/auth
+        target: /etc/traefik/auth
+        read_only: true
     networks:
       - psibase_net
-
-networks:
-  psibase_net:
-    driver: bridge 

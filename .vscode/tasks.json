@@ -10,6 +10,16 @@
                   "label": "$(tools) Initialize git"
                 }
               }
+        },
+        {
+            "label": "restart compose",
+            "type": "shell",
+            "command": "docker compose down && docker compose up -d",
+            "options": {
+                "statusbar": {
+                    "label": "$(refresh) Restart Compose"
+                }
+            }
         }
     ]
 }

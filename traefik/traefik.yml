@@ -1,0 +1,31 @@
+api:
+  insecure: false
+
+log:
+  level: DEBUG
+  format: json
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    network: psibase_net
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: "j.mart.x93@gmail.com"
+      storage: "/etc/traefik/acme/acme.json"
+      dnsChallenge:
+        provider: cloudflare
+        propagation:
+          delayBeforeChecks: 30s
