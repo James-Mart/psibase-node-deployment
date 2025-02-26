@@ -1,7 +1,15 @@
+tlsCommon: &tlsCommon
+  certResolver: cloudflare
+  domains:
+    - main: "{{ env "HOST" }}"
+      sans: ["*.{{ env "HOST" }}"]
+
 http:
   routers:
     psinode:
-      rule: Host(`{{ env "HOST" }}`) || (Host(`*.{{ env "HOST" }}`) && !Host(`x-admin.{{ env "HOST" }}`) && !Host(`x-traefik.{{ env "HOST" }}`))
+      rule: >-
+        {{- $host := env "HOST" -}}
+        Host(`{{$host}}`) || (Host(`*.{{$host}}`) && !Host(`x-admin.{{$host}}`) && !Host(`x-traefik.{{$host}}`))
       service: "psinode"
       entryPoints:
         - web
@@ -10,11 +18,7 @@ http:
         - security-headers
         - psinode-headers
         - psinode-rewrite
-      tls:
-        certResolver: cloudflare
-        domains:
-          - main: "{{ env "HOST" }}"
-            sans: ["*.{{ env "HOST" }}"]
+      tls: *tlsCommon
 
     admin:
       rule: Host(`x-admin.{{ env "HOST" }}`)
@@ -24,11 +28,7 @@ http:
       middlewares:
         - security-headers
         - admin-auth
-      tls:
-        certResolver: cloudflare
-        domains:
-          - main: "{{ env "HOST" }}"
-            sans: ["*.{{ env "HOST" }}"]
+      tls: *tlsCommon
         
     dashboard:
       rule: Host(`x-traefik.{{ env "HOST" }}`)
@@ -38,11 +38,7 @@ http:
       middlewares:
         - admin-auth
         - security-headers
-      tls:
-        certResolver: cloudflare
-        domains:
-          - main: "{{ env "HOST" }}"
-            sans: ["*.{{ env "HOST" }}"]
+      tls: *tlsCommon
 
   services:
     psinode:
