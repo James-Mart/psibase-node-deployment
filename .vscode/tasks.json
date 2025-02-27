@@ -12,12 +12,32 @@
               }
         },
         {
-            "label": "restart compose",
+            "label": "restart node",
             "type": "shell",
-            "command": "${workspaceFolder}/.scripts/restart-compose.sh",
+            "command": "${workspaceFolder}/.scripts/restart-node.sh",
             "options": {
                 "statusbar": {
-                    "label": "$(refresh) Restart Compose"
+                    "label": "$(refresh) Restart Node"
+                }
+            }
+        },
+        {
+            "label": "stop node",
+            "type": "shell",
+            "command": "${workspaceFolder}/.scripts/stop-node.sh",
+            "options": {
+                "statusbar": {
+                    "label": "$(stop-circle) Stop Node"
+                }
+            }
+        },
+        {
+            "label": "show logs",
+            "type": "shell",
+            "command": "${workspaceFolder}/.scripts/show-logs.sh",
+            "options": {
+                "statusbar": {
+                    "label": "$(output) Show Logs"
                 }
             }
         }
