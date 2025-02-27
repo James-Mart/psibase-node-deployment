@@ -1,83 +1,149 @@
-# Description
+## Project Overview
 
-The goal of this project is to create a docker compose setup that will maximally automate the setup of a production-ready psibase full-node.
+This repository contains a Docker Compose-based deployment solution for running a production-ready Psibase full node. The project provides an automated setup for deploying and managing a Psibase blockchain node with proper networking, security, and infrastructure configurations.
 
-# EC2 Server setup instructions
+> **Warning**
+> This deployment tool is still in active development, and there are no security guarantees. You are responsible for auditing all configurations and scripts before using in a production environment.
 
-* Use an r7a family instance (memory optimized).
-* Use Ubuntu 22.04 or later.
-* SSH-access to the server
-* Allow http/https web traffic (open ports 80/443).
-* Allow SSH access (open port 22).
-* Configure an elastic IP and associate it with the instance.
-* Buy a domain name
-  * Set the nameservers to point to a cloudflare account, so DNS can be managed by cloudflare.
-  * Create a cloudflare API key for the domain with the following permissions:
-    * Zone - DNS - Edit
-    * Zone - Zone - Read
-* Install prerequisites
-    * [Docker install guide](https://docs.docker.com/engine/install/)
-    * [Docker compose install guide](https://docs.docker.com/compose/install/)
-    * `git`
+## Purpose
 
-## Set up .env file
+The primary goal of this project is to simplify the deployment of a Psibase blockchain node by providing:
 
-Copy the `.env.template` file to `.env` and fill in the variables. These variables are used by various scripts to configure the services used for deployment.
+1. Automated setup of a production-grade containerized psibase full node
+2. Secure access to the node's API and services
+3. Secure access to ancillary tooling (traefik dashboards, prometheus, grafana, etc.)
+4. Proper network configuration and container routing
 
-## Set up docker permissions
+## Technical Stack
 
-Run the `.setup/docker-permissions.sh` script and reboot.
+The project uses the following technologies:
 
-<details>
-  <summary>Why?</summary>
+- **Docker & Docker Compose**: For containerization and service orchestration
+- **Psibase**: The blockchain node software (psinode)
+- **Traefik v3.3**: Reverse proxy for routing, SSL termination, and authentication
+- **Cloudflare**: For DNS management and SSL certificate issuance
+- **SoftHSM2**: For secure key management
+- **Bash Scripts**: For automation and setup procedures
 
-  Docker must run as root due to [overlay network requirements](https://docs.docker.com/engine/security/rootless/#known-limitations) in Docker Swarm. To avoid using `sudo` for every Docker command, add your non-root user to the Docker group. Otherwise you'll get permissions errors when running commands like `docker container ls`.
-</details>
+## Architecture
 
-## Set up basic authentication for admin subdomain
-
-The `x-admin.${HOST}` subdomain is protected with basic authentication. Run the setup script with your desired username:
-
-```bash
-./.setup/setup-admin-auth.sh psinode-admin
+```svgbob
+                                                     Node Architecture
+   .---------------------------------------------------------------------------------------------------------------------.
+   |                                                                                                                     |
+   |                                                                                                                     |
+   |                                 +------------------+                                                                |
+   |                                 |                  |                                                                |
+------Incoming Request (HTTP) ------>|    HTTP:80       |                                                                |
+   |                                 |    Entrypoint    |                                                                |
+   |                                 |                  |                                                                |
+   |                                 +------------------+                                                                |
+   |                                         |                                                                           |
+   |                                         | redirect                                                                  |
+   |                                         v                                                                           |
+   |                                 +------------------+                                                                |
+   |                                 |                  |                                                                |
+------Incoming Request (HTTPS) ----->|    HTTPS:443     |                                                                |
+   |                                 |    Entrypoint    |                                                                |
+   |                                 |                  |                                                                |
+   |                                 +------------------+                                                                |
+   |                                         |                                                                           |
+   |              +--------------------------+--------------------------+------------------------+                       |
+   |              |                          |                          |                        |                       |
+   |              v                          v                          v                        v                       |
+   |    +------------------+      +--------------------+      +---------------------+  +----------------------+          |
+   |    |                  |      |                    |      |                     |  |                      |          |
+   |    |  Main Router     |      |  Subdomain Router  |      |  Admin Router       |  |  Traefik Router      |          |
+   |    |  Host(`{HOST}`)  |      |  Host(`*.{HOST}`)  |      |  Host(`x-admin.*`)  |  |  Host(`x-traefik.*`) |          |
+   |    |                  |      |                    |      |                     |  |                      |          |
+   |    +------------------+      +--------------------+      +---------------------+  +----------------------+          |
+   |              |                          |                         |                         |                       |
+   |              |                          |                         |                         |                       |
+   |              +------------+-------------+-------------------------+                         |                       |
+   |                                         |                                                   |                       |
+   |                                         v                                                   v                       |
+   |                               +------------------+                                +---------------------+           |
+   |                               |                  |                                |                     |           |
+   |                               |  psinode:8090    |                                |  traefik dashboard  |           |
+   |                               |  +BasicAuth      |                                |  +BasicAuth         |           |
+   |                               |                  |                                |                     |           |
+   |                               +------------------+                                +---------------------+           |
+   |                                                                                                                     |
+   '---------------------------------------------------------------------------------------------------------------------'
 ```
 
-You will be prompted to enter and confirm a password for the user.
+The deployment currently consists of two main services:
 
-The script automatically creates the necessary directories, installs required utilities, creates the password file, and sets appropriate permissions. After running the script, you'll need to restart Docker Compose to apply the changes.
+1. **psinode**: The Psibase blockchain node container
+   - Runs the Psibase node software
+   - Manages blockchain data
+   - Endpoints only exposed internally on port 8090
+   - Uses SoftHSM2 for key management
 
-## After boot (or peering) is complete
+2. **reverse-proxy** (Traefik): 
+   - Handles all incoming HTTP/HTTPS traffic
+   - Manages SSL certificates via Cloudflare DNS challenge
+   - Routes traffic to appropriate services
+   - Provides dashboard access for monitoring
+   - Enforces security headers and authentication for protected apps (x-admin, x-traefik, etc.)
 
-### Set the psinode logger config
-
-The default loggers are probably not sufficient for production use.
-
-
-<details>
-  <summary>Show logger config</summary>
+## File Structure
 
 ```
-[logger.stderr]
-type   = console
-filter = Severity >= info
-format = [{TimeStamp}] [{Severity}]{?: [{RemoteEndpoint}]}: {Message}{?: {TransactionId}}{?: {BlockId}}{?RequestMethod:: {RequestMethod} {RequestHost}{RequestTarget}{?: {ResponseStatus}{?: {ResponseBytes}}}}{?: {ResponseTime} µs}{Indent:4:{TraceConsole}}
+├── .env.template              # Template for environment variables
+├── .scripts/                  # Utility scripts
+│   ├── initialize-git.sh      # Git initialization script
+│   ├── restart-node.sh        # Script to restart Docker Compose services
+│   ├── show-logs.sh           # Script to display psinode logs
+│   └── stop-node.sh           # Script to stop all Docker Compose services
+├── .setup/                    # Setup scripts (run once)
+│   ├── docker-permissions.sh  # Sets up Docker permissions
+│   └── setup-admin-auth.sh    # Sets up basic authentication file for authorization to private apps (x-admin, x-traefik, etc.)
+├── docker-compose.yml         # Main Docker Compose file that includes other compose files
+├── docker-compose.psinode.yml # Psinode service configuration
+├── docker-compose.proxy.yml   # Traefik proxy configuration
+├── psinode-init.sh            # Initialization entrypoint script for psinode container
+├── SETUP.md                   # Documentation and setup instructions
+└── traefik/                   # Traefik configuration
+    ├── acme/                  # Directory for storing SSL certificates
+    ├── auth/                  # Authentication files for admin access
+    ├── config/                # Traefik dynamic routing and middleware configuration
+    │   ├── middlewares.yml    # Traefik middleware configuration
+    │   └── routers.yml        # Traefik routing rules
+    └── traefik.yml            # Main Traefik static configuration
+```
 
-# Log all HTTP reqests to a separate file
-[logger.http]
-type         = file
-filter       = ResponseStatus
-format       = [{TimeStamp}] [{RemoteEndpoint}]: {RequestHost}: {RequestMethod} {RequestTarget}{?: {ResponseStatus}{?: {ResponseBytes}}}
-filename     = http.log
-target       = http-%3N.log
-rotationSize = 64 MiB
-rotationTime = R/2022-10-01T00:00:00Z/P1D
-maxFiles     = 10
-flush        = on
-```  
-</details>
+## Deployment Configuration
 
-### Updating psinode version
+### Network Configuration
 
-Changing `PSINODE_IMAGE` in `.env` and redeploying the compose file is likely insufficient. It will work for backwards compatible updates, but not for new major versions because the psinode database is not automatically cleared.
+The deployment sets up the following network endpoints:
 
-To update and reset the database, you have to bring down compose, delete the volumes related to the psinode database, and then restart compose (with an updated `PSINODE_IMAGE`).
+- HTTP on port 80 (redirects to HTTPS)
+- HTTPS on port 443
+- Internal psinode listens on port 8090
+
+### Routing and Security
+
+Traefik currently manages the following routes:
+
+- `{HOST}`: Main access to the Psibase node
+- `*.{HOST}`: Subdomains routed to the Psibase node (except admin subdomains)
+- `x-admin.{HOST}`: Admin interface for the node (protected by basic auth)
+- `x-traefik.{HOST}`: Traefik dashboard (protected by basic auth)
+
+## Security Features
+
+- HTTPS encryption using Let's Encrypt with Cloudflare DNS verification
+- Basic authentication for admin interfaces
+- Security headers for all HTTP responses
+- SoftHSM2 for secure key management
+- Automatic HTTP to HTTPS redirection
+
+## Data Persistence
+
+The deployment uses Docker volumes for persistent data:
+
+- `psinode-volume`: Stores blockchain data and configuration
+- `softhsm-keys`: Stores cryptographic keys for the node
+
