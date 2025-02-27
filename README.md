@@ -147,3 +147,6 @@ The deployment uses Docker volumes for persistent data:
 - `psinode-volume`: Stores blockchain data and configuration
 - `softhsm-keys`: Stores cryptographic keys for the node
 
+## Setup
+
+See [SETUP.md](./SETUP.md).
