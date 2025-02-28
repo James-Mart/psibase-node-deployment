@@ -90,7 +90,7 @@ The deployment currently consists of two main services:
 ## File Structure
 
 ```
-├── .env.template              # Template for environment variables
+├── .cursor/                   # Cursor editor-specific files
 ├── .scripts/                  # Utility scripts
 │   ├── initialize-git.sh      # Git initialization script
 │   ├── restart-node.sh        # Script to restart Docker Compose services
@@ -98,19 +98,25 @@ The deployment currently consists of two main services:
 │   └── stop-node.sh           # Script to stop all Docker Compose services
 ├── .setup/                    # Setup scripts (run once)
 │   ├── docker-permissions.sh  # Sets up Docker permissions
-│   └── setup-admin-auth.sh    # Sets up basic authentication file for authorization to private apps (x-admin, x-traefik, etc.)
-├── docker-compose.yml         # Main Docker Compose file that includes other compose files
+│   └── setup-admin-auth.sh    # Sets up basic authentication file for authorization to private apps
+├── .vscode/                   # VSCode editor-specific files
+├── softhsm/                   # SoftHSM configuration
+│   └── Dockerfile             # Dockerfile for building SoftHSM container with initialized token
+├── traefik/                   # Traefik configuration
+│   ├── acme/                  # Directory for storing SSL certificates
+│   ├── auth/                  # Authentication files for admin access
+│   ├── config/                # Traefik dynamic routing and middleware configuration
+│   │   ├── middlewares.yml    # Traefik middleware configuration
+│   │   └── routers.yml        # Traefik routing rules
+│   └── traefik.yml            # Main Traefik static configuration
+├── .env.template              # Template for environment variables
+├── .gitignore                 # Git ignore file
 ├── docker-compose.psinode.yml # Psinode service configuration
 ├── docker-compose.proxy.yml   # Traefik proxy configuration
-├── psinode-init.sh            # Initialization entrypoint script for psinode container
-├── SETUP.md                   # Documentation and setup instructions
-└── traefik/                   # Traefik configuration
-    ├── acme/                  # Directory for storing SSL certificates
-    ├── auth/                  # Authentication files for admin access
-    ├── config/                # Traefik dynamic routing and middleware configuration
-    │   ├── middlewares.yml    # Traefik middleware configuration
-    │   └── routers.yml        # Traefik routing rules
-    └── traefik.yml            # Main Traefik static configuration
+├── docker-compose.softhsm.yml # SoftHSM service configuration
+├── docker-compose.yml         # Main Docker Compose file that includes other compose files
+├── README.md                  # This file
+└── SETUP.md                   # Documentation and setup instructions
 ```
 
 ## Deployment Configuration

@@ -1,0 +1,15 @@
+services:
+  softhsm:
+    build:
+      context: ./softhsm
+      args:
+        - SOFTHSM_PIN=${SOFTHSM_PIN}
+    volumes:
+      - softhsm-keys:/var/lib/softhsm/tokens
+      - softhsm-lib:/usr/lib/x86_64-linux-gnu/softhsm
+    networks:
+      - psibase_net
+
+volumes:
+  softhsm-keys:
+  softhsm-lib: 
