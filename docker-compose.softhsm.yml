@@ -9,6 +9,8 @@ services:
       - softhsm-lib:/usr/lib/x86_64-linux-gnu/softhsm
     networks:
       - psibase_net
+    labels:
+      - "traefik.enable=false"
 
 volumes:
   softhsm-keys:
