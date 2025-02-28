@@ -6,20 +6,16 @@ services:
       - '8090:8090'
     ulimits:
       memlock: -1
-    command: [
-      "db",
-      "-p", "${PRODUCER_NAME}",
-      "-o", "${HOST}",
-      "--p2p",
-      "-l", "8090",
-      "--admin-authz=rw:any",
-      "--database-cache-size=${DB_CACHE_SIZE}",
-      "--pkcs11-module=/softhsm-lib/libsofthsm2.so"
-    ]
+    entrypoint: ["/scripts/psinode-entrypoint.sh"]
+    environment:
+      - PRODUCER_NAME=${PRODUCER_NAME}
+      - HOST=${HOST}
+      - DB_CACHE_SIZE=${DB_CACHE_SIZE}
     volumes:
-      - psinode-volume:/root/
+      - psinode-volume:/root/psibase
       - softhsm-keys:/var/lib/softhsm/tokens
       - softhsm-lib:/softhsm-lib
+      - ./psinode-entrypoint.sh:/scripts/psinode-entrypoint.sh:ro
       - ./traefik/auth:/etc/traefik/auth:ro
     networks:
       - psibase_net
