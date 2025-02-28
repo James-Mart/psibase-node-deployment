@@ -93,6 +93,7 @@ The deployment currently consists of two main services:
 ├── .cursor/                   # Cursor editor-specific files
 ├── .scripts/                  # Utility scripts
 │   ├── initialize-git.sh      # Git initialization script
+│   ├── restart-node-fresh.sh  # Script to restart services with a fresh psinode volume
 │   ├── restart-node.sh        # Script to restart Docker Compose services
 │   ├── show-logs.sh           # Script to display psinode logs
 │   └── stop-node.sh           # Script to stop all Docker Compose services
@@ -115,6 +116,7 @@ The deployment currently consists of two main services:
 ├── docker-compose.proxy.yml   # Traefik proxy configuration
 ├── docker-compose.softhsm.yml # SoftHSM service configuration
 ├── docker-compose.yml         # Main Docker Compose file that includes other compose files
+├── psinode-entrypoint.sh      # Custom entrypoint script for the psinode container
 ├── README.md                  # This file
 └── SETUP.md                   # Documentation and setup instructions
 ```
