@@ -83,9 +83,9 @@ format = [{TimeStamp}] [{Severity}]{?: [{RemoteEndpoint}]}: {Message}{?: {Transa
 type         = file
 filter       = ResponseStatus
 format       = [{TimeStamp}] [{RemoteEndpoint}]: {RequestHost}: {RequestMethod} {RequestTarget}{?: {ResponseStatus}{?: {ResponseBytes}}}
-filename     = http.log
-target       = http-%3N.log
-rotationSize = 64 MiB
+filename     = /root/psibase/db/http.log
+target       = /root/psibase/db/http-%3N.log
+rotationSize = 67108864
 rotationTime = R/2022-10-01T00:00:00Z/P1D
 maxFiles     = 10
 flush        = on
@@ -104,3 +104,7 @@ flush        = on
 Changing `PSINODE_IMAGE` in `.env` and redeploying the compose file is likely insufficient. It will work for backwards compatible updates, but not for new major versions because the psinode database is not automatically cleared.
 
 To update and reset the database, you have to bring down compose, delete the volumes related to the psinode database, and then restart compose (with an updated `PSINODE_IMAGE`).
+
+## Restarting psinode
+
+If you restart psinode and you are a block producer, you will need to unlock your hsm device again that holds your block signing keys. This can be done in the `x-admin` app.
