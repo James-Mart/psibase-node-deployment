@@ -119,7 +119,8 @@ The deployment currently consists of two main services:
 ├── docker-compose.yml         # Main Docker Compose file that includes other compose files
 ├── psinode-entrypoint.sh      # Custom entrypoint script for the psinode container
 ├── README.md                  # This file
-└── SETUP.md                   # Documentation and setup instructions
+├── SETUP.md                   # Documentation and setup instructions
+└── TROUBLESHOOTING.md         # Troubleshooting guide for common issues
 ```
 
 ## Deployment Configuration
