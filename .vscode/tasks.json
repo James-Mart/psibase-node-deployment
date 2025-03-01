@@ -32,12 +32,22 @@
             }
         },
         {
-            "label": "show logs",
+            "label": "psinode logs",
             "type": "shell",
-            "command": "${workspaceFolder}/.scripts/show-logs.sh",
+            "command": "${workspaceFolder}/.scripts/psinode-logs.sh",
             "options": {
                 "statusbar": {
-                    "label": "$(output) Show Logs"
+                    "label": "$(output) Psinode Logs"
+                }
+            }
+        },
+        {
+            "label": "traefik logs",
+            "type": "shell",
+            "command": "${workspaceFolder}/.scripts/traefik-logs.sh",
+            "options": {
+                "statusbar": {
+                    "label": "$(output) Traefik Logs"
                 }
             }
         }

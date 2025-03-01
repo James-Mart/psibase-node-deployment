@@ -95,7 +95,8 @@ The deployment currently consists of two main services:
 │   ├── initialize-git.sh      # Git initialization script
 │   ├── restart-node-fresh.sh  # Script to restart services with a fresh psinode volume
 │   ├── restart-node.sh        # Script to restart Docker Compose services
-│   ├── show-logs.sh           # Script to display psinode logs
+│   ├── psinode-logs.sh        # Script to display psinode logs
+│   ├── traefik-logs.sh        # Script to display traefik (reverse-proxy) logs
 │   └── stop-node.sh           # Script to stop all Docker Compose services
 ├── .setup/                    # Setup scripts (run once)
 │   ├── docker-permissions.sh  # Sets up Docker permissions
