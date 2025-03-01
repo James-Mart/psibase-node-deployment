@@ -44,3 +44,12 @@ http:
         servers:
           - url: "http://psinode:8090"
         passHostHeader: true 
+
+tls:
+  stores:
+    default:
+      defaultGeneratedCert:
+        resolver: cloudflare
+        domain:
+          main: "{{ env "HOST" }}"
+          sans: ["*.{{ env "HOST" }}"]
