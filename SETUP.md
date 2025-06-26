@@ -62,6 +62,16 @@ For example:
 ./.setup/setup-admin-auth.sh psinode-admin
 ```
 
+### Core Dump Configuration (Optional)
+
+To enable core dump capture when the psinode process crashes, run the setup script:
+
+```bash
+./.setup/setup-systemd-coredumps.sh
+```
+
+This configures the psinode container to generate core dumps that can be analyzed for debugging crashes. See the [Core dumps section in TROUBLESHOOTING.md](./TROUBLESHOOTING.md#core-dumps) for usage instructions.
+
 ### After boot (or peering) is complete
 
 ### Set the psinode logger config
