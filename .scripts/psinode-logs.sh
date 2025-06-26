@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker compose logs -f psinode 
+docker compose logs -f -n 100 psinode

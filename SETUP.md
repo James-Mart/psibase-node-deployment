@@ -66,11 +66,11 @@ For example:
 
 ### Set the psinode logger config
 
-The default loggers are probably not sufficient for production use.
+The default loggers are probably not sufficient for production use. Your needs may vary, consider taking time to study the psinode logging configurations and building the config that makes the most sense for your usecase.
 
 
 <details>
-  <summary>Show logger config</summary>
+  <summary>Show example logger configs</summary>
 
 ```
 [logger.stderr]
@@ -78,7 +78,7 @@ type   = console
 filter = Severity >= info
 format = [{TimeStamp}] [{Severity}]{?: [{RemoteEndpoint}]}: {Message}{?: {TransactionId}}{?: {BlockId}}{?RequestMethod:: {RequestMethod} {RequestHost}{RequestTarget}{?: {ResponseStatus}{?: {ResponseBytes}}}}{?: {ResponseTime} µs}{Indent:4:{TraceConsole}}
 
-# Log all HTTP reqests to a separate file
+# Log all HTTP requests to a separate file
 [logger.http]
 type         = file
 filter       = ResponseStatus
@@ -89,6 +89,19 @@ rotationSize = 67108864
 rotationTime = R/2022-10-01T00:00:00Z/P1D
 maxFiles     = 10
 flush        = on
+
+# Log p2p traffic to a separate file
+[logger.p2p]
+type         = file
+filter       = Severity >= debug & Channel = p2p
+format       = [{TimeStamp}] [{Severity}]{?: [{RemoteEndpoint}]}: {Message}
+filename     = /root/psibase/db/p2p.log
+target       = /root/psibase/db/p2p-%3N.log
+rotationSize = 67108864
+rotationTime = R/2022-10-01T00:00:00Z/P1D
+maxFiles     = 10
+flush        = on
+
 ```  
 </details>
 
