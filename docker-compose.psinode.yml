@@ -6,6 +6,7 @@ services:
       - '8090:8090'
     ulimits:
       memlock: -1
+      core: -1
     entrypoint: ["/scripts/psinode-entrypoint.sh"]
     environment:
       - PRODUCER_NAME=${PRODUCER_NAME}
