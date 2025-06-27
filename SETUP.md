@@ -83,9 +83,10 @@ The default loggers are probably not sufficient for production use. Your needs m
   <summary>Show example logger configs</summary>
 
 ```
+# Log non-http requests to stderr
 [logger.stderr]
 type   = console
-filter = Severity >= info
+filter = Severity >= debug & not ResponseStatus
 format = [{TimeStamp}] [{Severity}]{?: [{RemoteEndpoint}]}: {Message}{?: {TransactionId}}{?: {BlockId}}{?RequestMethod:: {RequestMethod} {RequestHost}{RequestTarget}{?: {ResponseStatus}{?: {ResponseBytes}}}}{?: {ResponseTime} µs}{Indent:4:{TraceConsole}}
 
 # Log all HTTP requests to a separate file
