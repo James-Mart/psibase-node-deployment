@@ -7,7 +7,7 @@ tlsCommon: &tlsCommon
 http:
   routers:
     psinode:
-      rule: Host(`{{ env "HOST" }}`) || (HostRegexp(`^.+\.{{ env "HOST" }}$`) && !Host(`x-admin.{{ env "HOST" }}`) && !Host(`x-traefik.{{ env "HOST" }}`))
+      rule: Host(`{{ env "HOST" }}`) || (HostRegexp(`^.+\.{{ env "HOST" }}$`) && !Host(`x-admin.{{ env "HOST" }}`) && !Host(`x-traefik.{{ env "HOST" }}`) && !Host(`x-logs.{{ env "HOST" }}`))
       service: "psinode"
       entryPoints:
         - web
@@ -38,12 +38,28 @@ http:
         - security-headers
       tls: *tlsCommon
 
+    logs:
+      rule: Host(`x-logs.{{ env "HOST" }}`)
+      service: "dozzle"
+      entryPoints:
+        - websecure
+      middlewares:
+        - security-headers
+        - admin-auth
+      tls: *tlsCommon
+
   services:
     psinode:
       loadBalancer:
         servers:
           - url: "http://psinode:8090"
         passHostHeader: true 
+
+    dozzle:
+      loadBalancer:
+        servers:
+          - url: "http://dozzle:8080"
+        passHostHeader: true
 
 tls:
   stores:

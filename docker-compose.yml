@@ -2,6 +2,7 @@ include:
   - docker-compose.softhsm.yml
   - docker-compose.psinode.yml
   - docker-compose.proxy.yml
+  - docker-compose.dozzle.yml
 
 networks:
   psibase_net:
