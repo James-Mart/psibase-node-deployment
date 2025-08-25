@@ -102,6 +102,8 @@ The deployment currently consists of two main services:
 │   ├── docker-permissions.sh  # Sets up Docker permissions
 │   └── setup-admin-auth.sh    # Sets up basic authentication file for authorization to private apps
 ├── .vscode/                   # VSCode editor-specific files
+├── ddclient/                  # DDClient configuration
+│   └── ddclient.conf.example  # Config file with cloudflare token 
 ├── softhsm/                   # SoftHSM configuration
 │   └── Dockerfile             # Dockerfile for building SoftHSM container with initialized token
 ├── traefik/                   # Traefik configuration
