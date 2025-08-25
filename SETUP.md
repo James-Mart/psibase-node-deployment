@@ -135,8 +135,8 @@ If you restart psinode and you are a block producer, you will need to unlock you
 
 # Optional 
 
-## Adding dynamic DNS
-Dynamic DNS can be used in the event your server does not have a static IP address. 
+## Dynamic DNS
+Dynamic DNS with the existing Cloudflare token can be used in the event your server does not have a static IP address. 
 
 - In `/ddclient` Rename `ddclient.conf.example` to `ddclient.conf` and add relevant variables.
 - Uncomment ddclient in `docker-compose.yml`
