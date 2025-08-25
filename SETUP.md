@@ -133,7 +133,11 @@ To update and reset the database, you have to bring down compose, delete the vol
 
 If you restart psinode and you are a block producer, you will need to unlock your hsm device again that holds your block signing keys. This can be done in the `x-admin` app.
 
+# Optional 
+
 ## Adding dynamic DNS
+Dynamic DNS can be used in the event your server does not have a static IP address. 
+
 - In `/ddclient` Rename `ddclient.conf.example` to `ddclient.conf` and add relevant variables.
 - Uncomment ddclient in `docker-compose.yml`
 - Restart with `.scripts/restart-node.sh`
