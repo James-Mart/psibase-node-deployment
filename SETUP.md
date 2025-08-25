@@ -135,5 +135,5 @@ If you restart psinode and you are a block producer, you will need to unlock you
 
 ## Adding dynamic DNS
 - In `/ddclient` Rename `ddclient.conf.example` to `ddclient.conf` and add relevant variables.
-- Remove comment in `docker-compose.yml`
+- Uncomment ddclient in `docker-compose.yml`
 - Restart with `.scripts/restart-node.sh`
