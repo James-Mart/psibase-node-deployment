@@ -1,0 +1,35 @@
+######################################################################
+##
+## Define default global variables with lines like:
+## 	var=value [, var=value]*
+## These values will be used for each following host unless overridden
+## with a local variable definition.
+##
+## Define local variables for one or more hosts with:
+## 	var=value [, var=value]* host.and.domain[,host2.and.domain...]
+##
+## Lines can be continued on the following line by ending the line
+## with a \
+##
+##
+## Warning: not all supported routers or dynamic DNS services
+##          are mentioned here.
+##
+######################################################################
+daemon=300				# check every 300 seconds
+syslog=yes				# log update msgs to syslog
+pid=/var/run/ddclient/ddclient.pid	# record PID in file.
+ssl=yes 				# use ssl-support.  Works with
+						# ssl-library
+
+use=web					# via web
+
+##
+## CloudFlare (www.cloudflare.com)
+##
+protocol=cloudflare,          \
+zone=***domain***,            \
+ttl=1,                        \
+login=token,                  \ # Only needed if you are using your global API key. If you are using an API token, set it to "token" (without double quotes).
+password=***CloudflareToken***             \ # This is either your global API key, or an API token. If you are using an API token, it must have the permissions "Zone - DNS - Edit" and "Zone - Zone - Read". The Zone resources must be "Include - All zones".
+*.***domain***,***domain***

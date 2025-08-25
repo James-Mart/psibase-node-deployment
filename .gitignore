@@ -7,3 +7,6 @@ traefik/acme/
 
 # Logs
 *.log
+
+# ddclient configuration
+ddclient.conf
