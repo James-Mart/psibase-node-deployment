@@ -3,6 +3,7 @@ include:
   - docker-compose.psinode.yml
   - docker-compose.proxy.yml
   - docker-compose.dozzle.yml
+  # - docker-compose.ddclient.yml
 
 networks:
   psibase_net:
