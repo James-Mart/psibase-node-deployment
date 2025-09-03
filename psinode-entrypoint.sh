@@ -8,7 +8,6 @@ if [ ! -d "/root/psibase/db" ] || [ -z "$(ls -A /root/psibase/db)" ]; then
         -o "${HOST}" \
         --p2p \
         -l 8090 \
-        --admin-authz=rw:any \
         --database-cache-size="${DB_CACHE_SIZE}" \
         --pkcs11-module=/softhsm-lib/libsofthsm2.so
 else
@@ -18,6 +17,5 @@ else
         -o "${HOST}" \
         --p2p \
         -l 8090 \
-        --admin-authz=rw:any \
         --database-cache-size="${DB_CACHE_SIZE}"
 fi
