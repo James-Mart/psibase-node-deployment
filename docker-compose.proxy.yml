@@ -15,4 +15,5 @@ services:
       - "./traefik/config:/etc/traefik/config:ro"
       - "./traefik/auth:/etc/traefik/auth:ro"
     networks:
-      - psibase_net
+      psibase_net:
+        ipv4_address: 172.30.0.10

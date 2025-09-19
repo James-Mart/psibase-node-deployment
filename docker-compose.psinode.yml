@@ -12,6 +12,7 @@ services:
       - PRODUCER_NAME=${PRODUCER_NAME}
       - HOST=${HOST}
       - DB_CACHE_SIZE=${DB_CACHE_SIZE}
+      - PSIBASE_ADMIN_IP=${PSIBASE_ADMIN_IP}
     volumes:
       - psinode-volume:/root/psibase
       - softhsm-keys:/var/lib/softhsm/tokens
@@ -19,7 +20,8 @@ services:
       - ./psinode-entrypoint.sh:/scripts/psinode-entrypoint.sh:ro
       - ./traefik/auth:/etc/traefik/auth:ro
     networks:
-      - psibase_net
+      psibase_net:
+        ipv4_address: 172.30.0.20
     depends_on:
       - softhsm
 

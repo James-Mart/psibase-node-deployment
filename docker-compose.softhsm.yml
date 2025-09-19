@@ -8,7 +8,8 @@ services:
       - softhsm-keys:/var/lib/softhsm/tokens
       - softhsm-lib:/usr/lib/x86_64-linux-gnu/softhsm
     networks:
-      - psibase_net
+      psibase_net:
+        ipv4_address: 172.30.0.30
     labels:
       - "traefik.enable=false"
 

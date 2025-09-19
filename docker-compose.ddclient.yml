@@ -9,3 +9,6 @@ services:
     volumes:
       - "./ddclient:/config"
     restart: unless-stopped
+    networks:
+      psibase_net:
+        ipv4_address: 172.30.0.50

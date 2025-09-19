@@ -7,5 +7,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - psibase_net
+      psibase_net:
+        ipv4_address: 172.30.0.40
     restart: unless-stopped 
