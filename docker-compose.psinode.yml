@@ -24,6 +24,14 @@ services:
         ipv4_address: 172.30.0.20
     depends_on:
       - softhsm
+    
+    # psinode logs can explode quickly, this provides reasonable
+    #   rotation & size limits
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1g"
+        max-file: "10"
 
 volumes:
   psinode-volume:
