@@ -7,24 +7,26 @@ tlsCommon: &tlsCommon
 http:
   routers:
     psinode:
-      rule: Host(`{{ env "HOST" }}`) || (HostRegexp(`^.+\.{{ env "HOST" }}$`) && !Host(`x-admin.{{ env "HOST" }}`) && !Host(`x-traefik.{{ env "HOST" }}`) && !Host(`x-logs.{{ env "HOST" }}`))
+      rule: Host(`{{ env "HOST" }}`) || (HostRegexp(`^.+\.{{ env "HOST" }}$`) && !HostRegexp(`^x-.+\.{{ env "HOST" }}$`))
       service: "psinode"
       entryPoints:
         - web
         - websecure
       middlewares:
         - security-headers
+        - strip-auth-header
         - psinode-headers
         - psinode-rewrite
       tls: *tlsCommon
 
-    admin:
-      rule: Host(`x-admin.{{ env "HOST" }}`)
+    x-services:
+      rule: HostRegexp(`^x-.+\.{{ env "HOST" }}$`) && !Host(`x-traefik.{{ env "HOST" }}`) && !Host(`x-logs.{{ env "HOST" }}`)
       service: "psinode"
       entryPoints:
         - websecure
       middlewares:
         - security-headers
+        - strip-auth-header
         - admin-auth
       tls: *tlsCommon
         
@@ -34,6 +36,7 @@ http:
       entryPoints:
         - websecure
       middlewares:
+        - strip-auth-header
         - admin-auth
         - security-headers
       tls: *tlsCommon
@@ -44,6 +47,7 @@ http:
       entryPoints:
         - websecure
       middlewares:
+        - strip-auth-header
         - security-headers
         - admin-auth
       tls: *tlsCommon

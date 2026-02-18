@@ -53,3 +53,22 @@ Remove coredumps older than a specified number of days:
 ```bash
 coredumpctl clean <days>
 ```
+
+### Initial Authentication
+
+Intended to work like this 
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Traefik
+    participant Psinode
+
+    Client->>Traefik: GET x-admin.host (may include X-Auth-User)
+    Note over Traefik: strip-auth-header removes X-Auth-User
+    Note over Traefik: admin-auth validates basic auth
+    Note over Traefik: admin-auth adds X-Auth-User = authenticated_user
+    Traefik->>Psinode: Request with X-Auth-User header
+    Note over Psinode: PSIBASE_USERNAME_FIELD=X-Auth-User
+    Psinode->>Client: Response
+```
