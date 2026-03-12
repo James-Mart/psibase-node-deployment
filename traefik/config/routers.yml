@@ -20,7 +20,7 @@ http:
       tls: *tlsCommon
 
     x-services:
-      rule: HostRegexp(`^x-.+\.{{ env "HOST" }}$`) && !Host(`x-traefik.{{ env "HOST" }}`) && !Host(`x-logs.{{ env "HOST" }}`)
+      rule: HostRegexp(`^x-.+\.{{ env "HOST" }}$`) && !Host(`x-traefik.{{ env "HOST" }}`) && !Host(`x-logs.{{ env "HOST" }}`) && !Host(`x-disk.{{ env "HOST" }}`)
       service: "psinode"
       entryPoints:
         - websecure
@@ -52,6 +52,17 @@ http:
         - admin-auth
       tls: *tlsCommon
 
+    disk:
+      rule: Host(`x-disk.{{ env "HOST" }}`)
+      service: "qdirstat"
+      entryPoints:
+        - websecure
+      middlewares:
+        - strip-auth-header
+        - security-headers
+        - admin-auth
+      tls: *tlsCommon
+
   services:
     psinode:
       loadBalancer:
@@ -63,6 +74,12 @@ http:
       loadBalancer:
         servers:
           - url: "http://dozzle:8080"
+        passHostHeader: true
+
+    qdirstat:
+      loadBalancer:
+        servers:
+          - url: "http://qdirstat:5800"
         passHostHeader: true
 
 tls:

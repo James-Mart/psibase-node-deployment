@@ -122,6 +122,7 @@ flush        = on
 - **Stopping the node**: `.scripts/stop-node.sh`
 - **Viewing psinode server logs**: `.scripts/show-logs.sh`
 - **Accessing admin dashboard**: Visit `https://x-admin.{HOST}`
+- **Disk usage analysis**: Visit `https://x-disk.{HOST}`
 
 ## Updating psinode
 

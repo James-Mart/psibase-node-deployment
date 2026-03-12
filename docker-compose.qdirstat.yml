@@ -1,0 +1,20 @@
+services:
+  qdirstat:
+    image: jlesage/qdirstat:latest
+    container_name: qdirstat
+    environment:
+      - USER_ID=0
+      - GROUP_ID=0
+    expose:
+      - '5800'
+    volumes:
+      - /:/storage:ro
+    networks:
+      psibase_net:
+        ipv4_address: 172.30.0.50
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    restart: unless-stopped
