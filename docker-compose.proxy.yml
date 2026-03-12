@@ -14,6 +14,11 @@ services:
       - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
       - "./traefik/config:/etc/traefik/config:ro"
       - "./traefik/auth:/etc/traefik/auth:ro"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
     networks:
       psibase_net:
         ipv4_address: 172.30.0.10
