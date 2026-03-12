@@ -6,7 +6,6 @@ if [ ! -d "/root/psibase/db" ] || [ -z "$(ls -A /root/psibase/db)" ]; then
     exec psinode db \
         -p "${PRODUCER_NAME}" \
         -o "${HOST}" \
-        --p2p \
         -l 8090 \
         --database-cache-size="${DB_CACHE_SIZE}" \
         --pkcs11-module=/softhsm-lib/libsofthsm2.so
