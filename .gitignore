@@ -2,6 +2,9 @@
 traefik/auth/
 traefik/acme/
 
+# Authelia credentials
+authelia/users_database.yml
+
 # Environment variables
 .env
 

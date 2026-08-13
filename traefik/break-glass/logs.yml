@@ -1,0 +1,24 @@
+tlsCommon: &tlsCommon
+  certResolver: cloudflare
+  domains:
+    - main: "{{ env "HOST" }}"
+      sans: ["*.{{ env "HOST" }}"]
+
+http:
+  middlewares:
+    basic-auth-fallback:
+      basicAuth:
+        usersFile: /etc/traefik/auth/users
+
+  routers:
+    logs-breakglass:
+      rule: Host(`x-logs.{{ env "HOST" }}`)
+      service: dozzle
+      entryPoints:
+        - websecure
+      priority: 100
+      middlewares:
+        - strip-auth-header
+        - basic-auth-fallback
+        - security-headers
+      tls: *tlsCommon

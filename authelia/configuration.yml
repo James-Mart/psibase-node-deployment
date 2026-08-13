@@ -1,0 +1,43 @@
+server:
+  address: 'tcp://:9091'
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+  password_reset:
+    disable: true
+
+session:
+  secret: '{{ env "AUTHELIA_SESSION_SECRET" }}'
+  cookies:
+    - domain: '{{ env "HOST" }}'
+      authelia_url: 'https://x-auth.{{ env "HOST" }}'
+
+storage:
+  encryption_key: '{{ env "AUTHELIA_STORAGE_ENCRYPTION_KEY" }}'
+  local:
+    path: /data/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /data/notification.txt
+
+access_control:
+  default_policy: 'deny'
+  rules:
+    - domain:
+        - 'x-auth.{{ env "HOST" }}'
+        - 'x-traefik.{{ env "HOST" }}'
+        - 'x-logs.{{ env "HOST" }}'
+        - 'x-disk.{{ env "HOST" }}'
+      policy: 'one_factor'
+    # Preflight OPTIONS only, on psinode-served x-* hosts (not this deployment's
+    # tool hosts or the portal — those match the rule above). The request still
+    # transits Authelia and is logged; this rule only decides that it passes.
+    # psinode applies its own checkAuth afterward — bypassing Authelia authorizes nothing.
+    - domain_regex: '^x-[^.]+\.{{ env "HOST" | replace "." "\\." }}$'
+      policy: 'bypass'
+      methods:
+        - 'OPTIONS'
+    - domain_regex: '^x-[^.]+\.{{ env "HOST" | replace "." "\\." }}$'
+      policy: 'one_factor'

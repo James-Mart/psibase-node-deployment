@@ -28,35 +28,6 @@ entryPoints:
     address: ":443"
 
 http:
-  middlewares:
-    security-headers:
-      headers:
-        sslRedirect: true
-        stsIncludeSubdomains: true
-        stsPreload: true
-        stsSeconds: 63072000
-    
-    psinode-headers:
-      headers:
-        customRequestHeaders:
-          Connection: "Upgrade"
-    
-    psinode-rewrite:
-      redirectRegex:
-        regex: "^http://([^/:]+)(:[0-9]+)?/(.*)$$"
-        replacement: "https://${1}/${3}"
-    
-    strip-auth-header:
-      headers:
-        customRequestHeaders:
-          X-Auth-User: ""
-        
-    admin-auth:
-      basicAuth:
-        usersFile: "/etc/traefik/auth/users"
-        headerField: "X-Auth-User"
-        
-  
   tls:
     options:
       default:

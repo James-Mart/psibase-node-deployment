@@ -53,26 +53,26 @@ The project uses the following technologies:
    |              v                          v                          v                        v                       |
    |    +------------------+      +--------------------+      +---------------------+  +----------------------+          |
    |    |                  |      |                    |      |                     |  |                      |          |
-   |    |  Main Router     |      |  Subdomain Router  |      |  Admin Router       |  |  Traefik Router      |          |
-   |    |  Host(`{HOST}`)  |      |  Host(`*.{HOST}`)  |      |  Host(`x-admin.*`)  |  |  Host(`x-traefik.*`) |          |
+   |    |  Main Router     |      |  Subdomain Router  |      |  x-* Routers        |  |  Auth Router         |          |
+   |    |  Host(`{HOST}`)  |      |  Host(`*.{HOST}`)  |      |  Host(`x-admin.*`)  |  |  Host(`x-auth.*`)    |          |
    |    |                  |      |                    |      |                     |  |                      |          |
    |    +------------------+      +--------------------+      +---------------------+  +----------------------+          |
    |              |                          |                         |                         |                       |
    |              |                          |                         |                         |                       |
-   |              +------------+-------------+-------------------------+                         |                       |
-   |                                         |                                                   |                       |
-   |                                         v                                                   v                       |
-   |                               +------------------+                                +---------------------+           |
-   |                               |                  |                                |                     |           |
-   |                               |  psinode:8090    |                                |  traefik dashboard  |           |
-   |                               |  +BasicAuth      |                                |  +BasicAuth         |           |
-   |                               |                  |                                |                     |           |
-   |                               +------------------+                                +---------------------+           |
+   |              +------------+-------------+                         |                         |                       |
+   |                           |                                       |                         |                       |
+   |                           v                                       v                         v                       |
+   |                 +------------------+                    +---------------------+   +---------------------+           |
+   |                 |                  |                    |                     |   |                     |           |
+   |                 |  psinode:8090    |                    |  Authelia session   |   |  Authelia portal    |           |
+   |                 |                  |                    |  (fails closed)     |   |                     |           |
+   |                 |                  |                    |                     |   |                     |           |
+   |                 +------------------+                    +---------------------+   +---------------------+           |
    |                                                                                                                     |
    '---------------------------------------------------------------------------------------------------------------------'
 ```
 
-The deployment currently consists of two main services:
+The deployment currently consists of three main services:
 
 1. **psinode**: The Psibase blockchain node container
    - Runs the Psibase node software
@@ -85,7 +85,12 @@ The deployment currently consists of two main services:
    - Manages SSL certificates via Cloudflare DNS challenge
    - Routes traffic to appropriate services
    - Provides dashboard access for monitoring
-   - Enforces security headers and authentication for protected apps (x-admin, x-traefik, etc.)
+   - Enforces security headers and the Authelia session for protected apps (x-admin, x-traefik, etc.)
+
+3. **authelia**:
+   - Login portal at `x-auth.{HOST}`
+   - Domain-scoped session that is the perimeter for all `x-*` admin surfaces
+   - Mandatory; Traefik fails closed (502) if Authelia is missing or down
 
 ## File Structure
 
@@ -141,13 +146,15 @@ Traefik currently manages the following routes:
 
 - `{HOST}`: Main access to the Psibase node
 - `*.{HOST}`: Subdomains routed to the Psibase node (except admin subdomains)
-- `x-admin.{HOST}`: Admin interface for the node (protected by basic auth)
-- `x-traefik.{HOST}`: Traefik dashboard (protected by basic auth)
+- `x-auth.{HOST}`: Authelia login portal
+- `x-admin.{HOST}`: Admin interface for the node (Authelia session)
+- `x-traefik.{HOST}`: Traefik dashboard (Authelia session)
 
 ## Security Features
 
 - HTTPS encryption using Let's Encrypt with Cloudflare DNS verification
-- Basic authentication for admin interfaces
+- Single Authelia session perimeter for all `x-*` admin surfaces; if Authelia is missing or down, Traefik fails closed (502) rather than serving them
+- CORS preflight `OPTIONS` to psinode-served `x-*` hosts (for example `x-peers.{HOST}`) bypass Authelia session checks so the request reaches psinode; this deployment's own tool hosts (`x-auth`, `x-traefik`, `x-logs`, `x-disk`) and all non-`OPTIONS` requests still require a session. Bypassing Authelia authorizes nothing: psinode still applies its own `checkAuth`, so a service that pre-handles `OPTIONS` answers with CORS headers and an empty body, and one that does not answers its own 401. Those CORS headers come back only when `Origin` is HTTPS and matches `x-admin.{HOST}`, and no reply depends on the request target, so a bare `curl` gets nothing usable and no way to enumerate paths
 - Security headers for all HTTP responses
 - SoftHSM2 for secure key management
 - Automatic HTTP to HTTPS redirection
@@ -161,4 +168,4 @@ The deployment uses Docker volumes for persistent data:
 
 ## Setup
 
-See [SETUP.md](./SETUP.md).
+See [SETUP.md](./SETUP.md). Operators already running a node and upgrading from HTTP Basic auth should follow [Migrating to Authelia session auth](./SETUP.md#migrating-to-authelia-session-auth). The `x-admin` peers panel also needs a psinode build that includes psibase#1987 and a node-local package upgrade — see [Updating psinode](./SETUP.md#updating-psinode).

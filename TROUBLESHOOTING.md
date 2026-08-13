@@ -1,5 +1,56 @@
 # Troubleshooting
 
+## Authelia down: break-glass access to x-logs
+
+When Authelia is missing, unprovisioned, or unhealthy, Traefik's `forwardAuth`
+middleware fails closed: every `x-*` surface answers **502 Bad Gateway**. That is
+the right default for `x-admin`, but it is exactly when you most need the log
+viewer.
+
+The repository ships an incident-only override that swaps session auth on
+`x-logs` for the Basic credential provisioned by
+`.setup/setup-admin-auth.sh`. It lives in `traefik/break-glass/logs.yml`, which
+is committed but **not** loaded until you copy it into the watched config
+directory.
+
+### Enable (no restart)
+
+```bash
+cp traefik/break-glass/logs.yml traefik/config/
+```
+
+Traefik's file provider watches `traefik/config/`; the change takes effect
+immediately.
+
+Log in with the username and password from when you ran
+`./.setup/setup-admin-auth.sh` — the same prompt that provisioned Authelia.
+
+**Leaving this file in place leaves a second, weaker perimeter on the log
+viewer.** Use it only while diagnosing the auth outage.
+
+### Disable
+
+```bash
+rm traefik/config/logs.yml
+```
+
+After Authelia is healthy again, `https://x-logs.{HOST}` should redirect to the
+portal at `https://x-auth.{HOST}` instead of prompting for Basic auth.
+
+## Peers panel fails with a CORS or network error
+
+If every other `x-*` surface works after you sign in, but the **Peers** panel
+in `x-admin` alone fails with a CORS or network error in the browser console,
+the Authelia perimeter is fine. The node-local packages predate
+[psibase#1987](https://github.com/gofractally/psibase/pull/1987): an older
+`XPeers` checks authorization before it answers the CORS preflight and returns
+401 without CORS headers, which the browser reports as a CORS or network error.
+
+This is not a proxy or login problem. Upgrade the node-local packages once the
+node is running a psinode build that includes that fix — see
+[Updating psinode](./SETUP.md#updating-psinode). Until a release contains it, no
+published image includes the fix.
+
 ## No HSM detected
 
 This error typically means that you did the following:
@@ -62,13 +113,21 @@ Intended to work like this
 sequenceDiagram
     participant Client
     participant Traefik
+    participant Authelia
     participant Psinode
 
-    Client->>Traefik: GET x-admin.host (may include X-Auth-User)
-    Note over Traefik: strip-auth-header removes X-Auth-User
-    Note over Traefik: admin-auth validates basic auth
-    Note over Traefik: admin-auth adds X-Auth-User = authenticated_user
-    Traefik->>Psinode: Request with X-Auth-User header
-    Note over Psinode: PSIBASE_USERNAME_FIELD=X-Auth-User
+    Client->>Traefik: GET x-admin.host (may include Remote-User)
+    Note over Traefik: strip-auth-header blanks Remote-User and X-Auth-User
+    Traefik->>Authelia: forwardAuth (HOST-scoped session cookie)
+    alt no session
+        Authelia-->>Traefik: redirect to x-auth.host
+        Traefik-->>Client: 302 to portal
+        Note over Client,Authelia: operator logs in; Authelia sets HOST-scoped session cookie
+        Client->>Traefik: GET x-admin.host (session cookie)
+        Traefik->>Authelia: forwardAuth
+    end
+    Authelia-->>Traefik: 200 + Remote-User
+    Traefik->>Psinode: Request with Remote-User header
+    Note over Psinode: PSIBASE_USERNAME_FIELD=Remote-User
     Psinode->>Client: Response
 ```
