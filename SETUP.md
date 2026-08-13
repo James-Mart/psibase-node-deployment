@@ -64,6 +64,10 @@ For example:
 
 To rotate the password, re-run the script with the same username and enter the new password, then restart Docker Compose.
 
+If Authelia is down and every `x-*` surface returns 502, you can still reach the
+log viewer with the Basic credential above — see
+[Authelia down: break-glass access to x-logs](./TROUBLESHOOTING.md#authelia-down-break-glass-access-to-x-logs).
+
 ### Core Dump Configuration (Optional)
 
 To enable core dump capture when the psinode process crashes, run the setup script:

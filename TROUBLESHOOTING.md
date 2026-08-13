@@ -1,5 +1,42 @@
 # Troubleshooting
 
+## Authelia down: break-glass access to x-logs
+
+When Authelia is missing, unprovisioned, or unhealthy, Traefik's `forwardAuth`
+middleware fails closed: every `x-*` surface answers **502 Bad Gateway**. That is
+the right default for `x-admin`, but it is exactly when you most need the log
+viewer.
+
+The repository ships an incident-only override that swaps session auth on
+`x-logs` for the Basic credential provisioned by
+`.setup/setup-admin-auth.sh`. It lives in `traefik/break-glass/logs.yml`, which
+is committed but **not** loaded until you copy it into the watched config
+directory.
+
+### Enable (no restart)
+
+```bash
+cp traefik/break-glass/logs.yml traefik/config/
+```
+
+Traefik's file provider watches `traefik/config/`; the change takes effect
+immediately.
+
+Log in with the username and password from when you ran
+`./.setup/setup-admin-auth.sh` — the same prompt that provisioned Authelia.
+
+**Leaving this file in place leaves a second, weaker perimeter on the log
+viewer.** Use it only while diagnosing the auth outage.
+
+### Disable
+
+```bash
+rm traefik/config/logs.yml
+```
+
+After Authelia is healthy again, `https://x-logs.{HOST}` should redirect to the
+portal at `https://x-auth.{HOST}` instead of prompting for Basic auth.
+
 ## No HSM detected
 
 This error typically means that you did the following:
