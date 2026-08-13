@@ -53,14 +53,16 @@ Copy the `.env.template` file to a new file called `.env` and fill in the variab
 To avoid Docker permissions errors, add your non-root user to the Docker group.
 To do this, run the `.setup/docker-permissions.sh` script and reboot.
 
-### Set up basic authentication for admin subdomain
+### Provision admin authentication credentials
 
-The `x-*.${HOST}` subdomains are protected with basic authentication. Run the setup script with your desired username and follow prompts to create the password file used for basic-auth.
+The `x-*.${HOST}` subdomains require authentication. Run the setup script with your desired username and follow the password prompts. One password provisions both the Authelia session credential (`authelia/users_database.yml`) and the break-glass Basic credential (`traefik/auth/users`) together.
 
 For example:
 ```bash
 ./.setup/setup-admin-auth.sh psinode-admin
 ```
+
+To rotate the password, re-run the script with the same username and enter the new password, then restart Docker Compose.
 
 ### Core Dump Configuration (Optional)
 
