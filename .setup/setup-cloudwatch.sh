@@ -1,3 +1,4 @@
+#!/bin/bash
 # This OPTIONAL script is used to help setup the CloudWatch agent for this ec2 instance on AWS.
 # This has not been deeply tested.
 

@@ -43,7 +43,7 @@ fi
 HASH=$(docker run --rm "$AUTHELIA_IMAGE" authelia crypto hash generate argon2 --password "$PASSWORD")
 HASH=${HASH#Digest: }
 
-if [[ ! "$HASH" == '$argon2id$'* ]]; then
+if [[ "$HASH" != \$argon2id\$* ]]; then
   echo "Error: failed to generate Authelia password hash. Check AUTHELIA_IMAGE and Docker." >&2
   exit 1
 fi
