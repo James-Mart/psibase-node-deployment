@@ -55,11 +55,16 @@ To do this, run the `.setup/docker-permissions.sh` script and reboot.
 
 ### Provision admin authentication credentials
 
-The `x-*.${HOST}` subdomains require authentication. Run the setup script with your desired username and follow the password prompts. One password provisions both the Authelia session credential (authelia/users_database.yml) and the break-glass Basic credential (traefik/auth/users) together.
+The `x-*.${HOST}` subdomains require authentication. Run the setup script with your desired username and follow the password prompts. One password provisions both the Authelia session credential (authelia/users_database.yml) and the break-glass Basic credential (traefik/auth/users) together. The script uses Docker only — no host packages such as `apache2-utils` are required.
 
 For example:
 ```bash
 ./.setup/setup-admin-auth.sh psinode-admin
+```
+
+For unattended provisioning (for example from automation), pass the username and read the password from standard input:
+```bash
+printf '%s\n' 'your-password' | ./.setup/setup-admin-auth.sh --username psinode-admin --password-stdin
 ```
 
 To rotate the password, re-run the script with the same username and enter the new password, then restart Docker Compose.

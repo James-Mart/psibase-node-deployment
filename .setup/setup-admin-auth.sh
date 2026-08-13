@@ -3,14 +3,51 @@
 
 set -euo pipefail
 
-# Check if username was provided
-if [ $# -ne 1 ]; then
+USERNAME=""
+PASSWORD_STDIN=false
+
+usage() {
   echo "Usage: $0 <username>"
+  echo "       $0 --username <name> --password-stdin"
   echo "Example: $0 psinode-admin"
   exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --username)
+      [[ $# -ge 2 ]] || usage
+      USERNAME="$2"
+      shift 2
+      ;;
+    --password-stdin)
+      PASSWORD_STDIN=true
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage
+      ;;
+    *)
+      if [[ -n "$USERNAME" ]]; then
+        echo "Error: username specified more than once." >&2
+        usage
+      fi
+      USERNAME="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ "$PASSWORD_STDIN" == true && -z "$USERNAME" ]]; then
+  echo "Error: --password-stdin requires --username." >&2
+  usage
 fi
 
-USERNAME=$1
+if [[ -z "$USERNAME" ]]; then
+  usage
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
@@ -23,21 +60,22 @@ if [ -z "${AUTHELIA_IMAGE:-}" ]; then
   exit 1
 fi
 
-# Create directories for authentication files
 mkdir -p "$REPO_ROOT/traefik/auth" "$REPO_ROOT/authelia"
 
-# Install apache2-utils for htpasswd utility
-sudo apt-get update && sudo apt-get install -y apache2-utils
-
 echo "Creating credentials for user: $USERNAME"
-read -s -r -p "Enter password: " PASSWORD
-echo
-read -s -r -p "Confirm password: " PASSWORD_CONFIRM
-echo
 
-if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
-  echo "Error: passwords do not match." >&2
-  exit 1
+if [[ "$PASSWORD_STDIN" == true ]]; then
+  read -r PASSWORD
+else
+  read -s -r -p "Enter password: " PASSWORD
+  echo
+  read -s -r -p "Confirm password: " PASSWORD_CONFIRM
+  echo
+
+  if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
+    echo "Error: passwords do not match." >&2
+    exit 1
+  fi
 fi
 
 HASH=$(docker run --rm "$AUTHELIA_IMAGE" authelia crypto hash generate argon2 --password "$PASSWORD")
@@ -50,7 +88,7 @@ fi
 
 cd "$REPO_ROOT"
 
-htpasswd -bc ./traefik/auth/users "$USERNAME" "$PASSWORD"
+docker run --rm httpd:2.4-alpine htpasswd -nbB "$USERNAME" "$PASSWORD" > ./traefik/auth/users
 
 {
   echo "users:"
