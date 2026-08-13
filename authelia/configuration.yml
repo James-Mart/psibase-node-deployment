@@ -31,6 +31,12 @@ access_control:
         - 'x-logs.{{ env "HOST" }}'
         - 'x-disk.{{ env "HOST" }}'
       policy: 'one_factor'
+    - domain: 'x-peers.{{ env "HOST" }}'
+      policy: 'bypass'
+      methods:
+        - 'GET'
+      resources:
+        - '^/p2p$'
     # Preflight OPTIONS only, on psinode-served x-* hosts (not this deployment's
     # tool hosts or the portal — those match the rule above). The request still
     # transits Authelia and is logged; this rule only decides that it passes.
