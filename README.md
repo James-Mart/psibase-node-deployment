@@ -166,6 +166,23 @@ The deployment uses Docker volumes for persistent data:
 - `psinode-volume`: Stores blockchain data and configuration
 - `softhsm-keys`: Stores cryptographic keys for the node
 
+## Verification
+
+Contributors and operators who have forked this repository can ask whether a change broke anything before pushing:
+
+```bash
+.ci/run-checks.sh
+```
+
+Docker is the only prerequisite. The script runs static checks that do not start the deployment or require secrets:
+
+- **compose-config** — validates the Compose files parse cleanly
+- **docs-paths** — ensures paths referenced in Markdown documentation exist
+- **env-drift** — catches environment variables referenced in Compose or Traefik config but missing from `.env.template` (and vice versa)
+- **shellcheck** — lints tracked shell scripts
+
+The same checks run in CI on every pull request and on pushes to `main`.
+
 ## Setup
 
 See [SETUP.md](./SETUP.md). Operators already running a node and upgrading from HTTP Basic auth should follow [Migrating to Authelia session auth](./SETUP.md#migrating-to-authelia-session-auth). The `x-admin` peers panel also needs a psinode build that includes psibase#1987 and a node-local package upgrade — see [Updating psinode](./SETUP.md#updating-psinode).

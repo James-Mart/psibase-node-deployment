@@ -55,7 +55,7 @@ To do this, run the `.setup/docker-permissions.sh` script and reboot.
 
 ### Provision admin authentication credentials
 
-The `x-*.${HOST}` subdomains require authentication. Run the setup script with your desired username and follow the password prompts. One password provisions both the Authelia session credential (`authelia/users_database.yml`) and the break-glass Basic credential (`traefik/auth/users`) together.
+The `x-*.${HOST}` subdomains require authentication. Run the setup script with your desired username and follow the password prompts. One password provisions both the Authelia session credential (authelia/users_database.yml) and the break-glass Basic credential (traefik/auth/users) together.
 
 For example:
 ```bash
@@ -126,7 +126,7 @@ flush        = on
 
 - **(Re)Starting the node**: `.scripts/restart-node.sh`
 - **Stopping the node**: `.scripts/stop-node.sh`
-- **Viewing psinode server logs**: `.scripts/show-logs.sh`
+- **Viewing psinode server logs**: `.scripts/psinode-logs.sh`
 - **Accessing admin dashboard**: Visit `https://x-admin.{HOST}` (first login redirects through the Authelia portal at `https://x-auth.{HOST}`)
 - **Disk usage analysis**: Visit `https://x-disk.{HOST}`
 
@@ -148,7 +148,7 @@ For operators already running a node on an older revision of this repository (HT
    ```bash
    ./.setup/setup-admin-auth.sh <your-username>
    ```
-   One password still provisions both the Authelia session store (`authelia/users_database.yml`) and the break-glass Basic file (`traefik/auth/users`). The Basic file is deliberately kept but is **no longer** the login path for the toolkit — you sign in through Authelia.
+   One password still provisions both the Authelia session store (authelia/users_database.yml) and the break-glass Basic file (traefik/auth/users). The Basic file is deliberately kept but is **no longer** the login path for the toolkit — you sign in through Authelia.
 
 4. **Restart the stack:**
    ```bash
