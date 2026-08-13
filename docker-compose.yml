@@ -1,6 +1,7 @@
 include:
   - docker-compose.softhsm.yml
   - docker-compose.psinode.yml
+  - docker-compose.authelia.yml
   - docker-compose.proxy.yml
   - docker-compose.dozzle.yml
   - docker-compose.qdirstat.yml

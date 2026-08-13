@@ -1,0 +1,29 @@
+server:
+  address: 'tcp://:9091'
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+  password_reset:
+    disable: true
+
+session:
+  secret: '{{ env "AUTHELIA_SESSION_SECRET" }}'
+  cookies:
+    - domain: '{{ env "HOST" }}'
+      authelia_url: 'https://x-auth.{{ env "HOST" }}'
+
+storage:
+  encryption_key: '{{ env "AUTHELIA_STORAGE_ENCRYPTION_KEY" }}'
+  local:
+    path: /data/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /data/notification.txt
+
+access_control:
+  default_policy: 'deny'
+  rules:
+    - domain_regex: '^x-[^.]+\.{{ env "HOST" | replace "." "\\." }}$'
+      policy: 'one_factor'
