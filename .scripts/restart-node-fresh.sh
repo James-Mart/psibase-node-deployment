@@ -4,8 +4,11 @@
 echo "Bringing down all containers..."
 docker compose down --remove-orphans
 
+COMPOSE_PROJECT="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}"
+PSINODE_VOLUME="${COMPOSE_PROJECT}_psinode-volume"
+
 echo "Removing psinode volume..."
-docker volume rm psibase-node-deployment_psinode-volume || echo "[Warning] Volume doesn't exist or cannot be removed"
+docker volume rm "$PSINODE_VOLUME" || echo "[Warning] Volume doesn't exist or cannot be removed"
 
 echo "Starting services with clean volume..."
 docker compose up -d
