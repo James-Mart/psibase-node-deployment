@@ -1,0 +1,60 @@
+name: psibase-node-ci
+
+networks:
+  psibase_net:
+    name: psibase_ci_net
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24
+          gateway: 172.31.0.1
+
+services:
+  reverse-proxy:
+    # Traefik takes static configuration from one source only, and the mounted
+    # traefik/traefik.yml wins over both env vars and CLI flags, so the ACME CA
+    # server cannot be pointed somewhere harmless. Refusing outbound HTTPS is
+    # what keeps issuance off Let's Encrypt and Cloudflare: every ACME request
+    # dies at the proxy connect. The routed backends are all plain http, so
+    # request proxying is untouched.
+    environment:
+      - HTTPS_PROXY=http://127.0.0.1:9
+    networks:
+      psibase_net:
+        ipv4_address: 172.31.0.10
+
+  psinode:
+    environment:
+      - PSIBASE_ADMIN_IP=172.31.0.10
+    networks:
+      psibase_net:
+        ipv4_address: 172.31.0.20
+
+  softhsm:
+    networks:
+      psibase_net:
+        ipv4_address: 172.31.0.30
+
+  dozzle:
+    networks:
+      psibase_net:
+        ipv4_address: 172.31.0.40
+
+  qdirstat:
+    networks:
+      psibase_net:
+        ipv4_address: 172.31.0.50
+
+  authelia:
+    networks:
+      psibase_net:
+        ipv4_address: 172.31.0.60
+
+volumes:
+  psinode-volume:
+    name: psibase-node-ci_psinode-volume
+  softhsm-keys:
+    name: psibase-node-ci_softhsm-keys
+  softhsm-lib:
+    name: psibase-node-ci_softhsm-lib
+  authelia-data:
+    name: psibase-node-ci_authelia-data
