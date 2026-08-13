@@ -105,3 +105,8 @@ The x-admin peers panel needs a psinode build that includes
 days earlier. CI on this pin cannot demonstrate a working peers panel.
 Watch [psibase releases](https://github.com/gofractally/psibase/releases)
 for a tag after that date.
+
+Bring-up still HTTP-probes the perimeter on `x-peers.{HOST}` (no WebSocket
+101): `GET /p2p` must **not** 302 to `x-auth.{HOST}` (Authelia bypass for the
+P2P handshake); `GET /graphql` must still 302 there (admin path gated). These
+run in the same phase as the unauthenticated `x-logs` redirect probe.

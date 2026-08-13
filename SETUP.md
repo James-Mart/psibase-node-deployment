@@ -178,7 +178,9 @@ To update and reset the database, you have to bring down compose, delete the vol
 
 ### Peers panel: psinode version and node-local packages
 
-The **Peers** panel in `x-admin` calls `x-peers` from the browser. That only works if the node is running a psinode build that includes [psibase#1987](https://github.com/gofractally/psibase/pull/1987), merged 2026-08-10.
+The **Peers** panel in `x-admin` calls `x-peers` from the browser (`/connect`, `/graphql`) with your Authelia session. Foreign nodes peer with `GET https://x-peers.{HOST}/p2p` instead; that handshake bypasses Authelia on this host only, and psinode still authenticates it with `--p2p` / `checkP2PAuth`. If a handshake gets **302** to `x-auth.{HOST}`, Authelia is still gating `/p2p`.
+
+The panel only works if the node is running a psinode build that includes [psibase#1987](https://github.com/gofractally/psibase/pull/1987), merged 2026-08-10.
 
 No release includes that yet. The newest published tag is `v0.25.0-pre` (2026-08-05), which predates the merge. Watch [psibase releases](https://github.com/gofractally/psibase/releases) after that date and set `PSINODE_IMAGE` to a tag that contains the fix — do not assume a version that does not exist.
 

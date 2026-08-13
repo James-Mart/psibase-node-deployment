@@ -37,6 +37,10 @@ rm traefik/config/logs.yml
 After Authelia is healthy again, `https://x-logs.{HOST}` should redirect to the
 portal at `https://x-auth.{HOST}` instead of prompting for Basic auth.
 
+## P2P handshake redirected to x-auth
+
+If `GET https://x-peers.{HOST}/p2p` returns **302** to `https://x-auth.{HOST}`, Authelia is still gating the handshake. That path should bypass Authelia (only `GET /p2p` on `x-peers.{HOST}`; not `/connect`, `/graphql`, or other `x-*` hosts). Confirm `authelia/configuration.yml` has the bypass rule before the psinode-served `x-*` `one_factor` catch-all, and that Traefik routes that request through `admin-auth` with request header `Connection: Upgrade`.
+
 ## Peers panel fails with a CORS or network error
 
 If every other `x-*` surface works after you sign in, but the **Peers** panel

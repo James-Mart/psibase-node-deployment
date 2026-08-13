@@ -19,6 +19,19 @@ http:
         - psinode-rewrite
       tls: *tlsCommon
 
+    x-peers-p2p:
+      rule: Host(`x-peers.{{ env "HOST" }}`) && Path(`/p2p`) && Method(`GET`)
+      service: "psinode"
+      entryPoints:
+        - websecure
+      priority: 100
+      middlewares:
+        - security-headers
+        - strip-auth-header
+        - admin-auth
+        - psinode-headers
+      tls: *tlsCommon
+
     x-services:
       rule: HostRegexp(`^x-.+\.{{ env "HOST" }}$`) && !Host(`x-traefik.{{ env "HOST" }}`) && !Host(`x-logs.{{ env "HOST" }}`) && !Host(`x-disk.{{ env "HOST" }}`) && !Host(`x-auth.{{ env "HOST" }}`)
       service: "psinode"

@@ -41,6 +41,7 @@ if [[ -z "${AUTHELIA_IMAGE:-}" ]]; then
 fi
 
 X_HOST="x-logs.${HOST}"
+X_PEERS_HOST="x-peers.${HOST}"
 CURL_BODY=""
 CURL_HEADERS=""
 LAST_PROBE_URL=""
@@ -306,6 +307,48 @@ assert_x_auth_redirect() {
   die "x-* assertion failed: Authelia not redirecting after ${READY_TIMEOUT}s (last status ${code:-none})"
 }
 
+assert_x_peers_p2p_ungated() {
+  local deadline=$((SECONDS + READY_TIMEOUT))
+  local code location
+  echo "Asserting https://${X_PEERS_HOST}/p2p is not redirected to x-auth..."
+  while ((SECONDS < deadline)); do
+    code="$(https_get "$X_PEERS_HOST" "https://${X_PEERS_HOST}/p2p")"
+    LAST_PROBE_CODE="$code"
+    location="$(header_value Location)"
+    if [[ "$code" == "502" || "$code" == "503" ]]; then
+      sleep 2
+      continue
+    fi
+    if [[ "$code" == "302" ]] && [[ "$location" == *"x-auth.${HOST}"* ]]; then
+      die "x-peers /p2p assertion failed: want not redirected to x-auth.${HOST}, got status=${code} location=${location}"
+    fi
+    echo "x-peers /p2p ok (status ${code})"
+    return 0
+  done
+  die "x-peers /p2p assertion failed: Authelia not ready after ${READY_TIMEOUT}s (last status ${code:-none})"
+}
+
+assert_x_peers_graphql_gated() {
+  local deadline=$((SECONDS + READY_TIMEOUT))
+  local code location
+  echo "Asserting https://${X_PEERS_HOST}/graphql redirects to x-auth..."
+  while ((SECONDS < deadline)); do
+    code="$(https_get "$X_PEERS_HOST" "https://${X_PEERS_HOST}/graphql")"
+    LAST_PROBE_CODE="$code"
+    location="$(header_value Location)"
+    if [[ "$code" == "502" || "$code" == "503" ]]; then
+      sleep 2
+      continue
+    fi
+    if [[ "$code" == "302" ]] && [[ "$location" == *"x-auth.${HOST}"* ]]; then
+      echo "x-peers /graphql ok (302 ${location})"
+      return 0
+    fi
+    die "x-peers /graphql assertion failed: want 302 to x-auth.${HOST} (not 502), got status=${code} location=${location}"
+  done
+  die "x-peers /graphql assertion failed: Authelia not redirecting after ${READY_TIMEOUT}s (last status ${code:-none})"
+}
+
 read_psinode_argv() {
   docker compose exec -T psinode cat /proc/1/cmdline | tr '\0' ' '
 }
@@ -413,6 +456,8 @@ assert_entrypoint_branch resume
 
 assert_http_301
 assert_x_auth_redirect
+assert_x_peers_p2p_ungated
+assert_x_peers_graphql_gated
 assert_softhsm_token
 assert_acme_blocked
 
