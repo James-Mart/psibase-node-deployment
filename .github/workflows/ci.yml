@@ -5,11 +5,72 @@ on:
   push:
     branches:
       - main
+  schedule:
+    # Weekly upstream drift — deliberate cadence; not nightly.
+    - cron: "0 0 * * 0"
+  # Manual runs exist to exercise the drift job on demand. The blocking jobs
+  # below deliberately do not run on this event, so a manual drift run reports
+  # on nothing but itself.
+  workflow_dispatch:
 
 jobs:
   static:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run static checks
         run: .ci/run-checks.sh
+
+  bring-up:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Isolated bring-up
+        run: |
+          CI_ADMIN_PASSWORD="$(openssl rand -base64 24)"
+          export CI_ADMIN_PASSWORD
+          .ci/bring-up.sh
+
+  entrypoint-mutation:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bring-up catches a wrong entrypoint branch
+        run: |
+          CI_ADMIN_PASSWORD="$(openssl rand -base64 24)"
+          export CI_ADMIN_PASSWORD
+          .ci/entrypoint-mutation-check.sh
+
+  drift:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upstream drift — floating psinode image
+        id: psinode
+        run: |
+          FLOATING_IMAGE="$(.ci/floating-psinode-image.sh)"
+          echo "=== upstream drift (non-blocking) ==="
+          echo "This job runs .ci/bring-up.sh against a floating version tag, not the digest-pinned image in .ci/.env.ci."
+          echo "A failure here means upstream moved; it is not a regression in this repository."
+          echo "This registry has no :latest. Floating means the newest published v*.*.*[-pre] tag."
+          echo "Floating tag: ${FLOATING_IMAGE}"
+          docker pull "${FLOATING_IMAGE}"
+          RESOLVED_DIGEST="$(docker inspect --format='{{index .RepoDigests 0}}' "${FLOATING_IMAGE}")"
+          echo "Resolved digest: ${RESOLVED_DIGEST}"
+          echo "image=${FLOATING_IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "digest=${RESOLVED_DIGEST}" >> "$GITHUB_OUTPUT"
+      - name: Isolated bring-up (upstream drift)
+        env:
+          PSINODE_IMAGE: ${{ steps.psinode.outputs.image }}
+        run: |
+          CI_ADMIN_PASSWORD="$(openssl rand -base64 24)"
+          export CI_ADMIN_PASSWORD
+          echo "Running bring-up with PSINODE_IMAGE=${PSINODE_IMAGE} (resolved: ${{ steps.psinode.outputs.digest }})"
+          .ci/bring-up.sh

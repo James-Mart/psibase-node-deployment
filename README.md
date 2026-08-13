@@ -177,11 +177,30 @@ Contributors and operators who have forked this repository can ask whether a cha
 Docker is the only prerequisite. The script runs static checks that do not start the deployment or require secrets:
 
 - **compose-config** — validates the Compose files parse cleanly
+- **compose-ci-fidelity** — confirms the CI override only isolates the stack and does not change what is under test
 - **docs-paths** — ensures paths referenced in Markdown documentation exist
 - **env-drift** — catches environment variables referenced in Compose or Traefik config but missing from `.env.template` (and vice versa)
 - **shellcheck** — lints tracked shell scripts
 
 The same checks run in CI on every pull request and on pushes to `main`.
+
+To exercise the full stack the way CI does — start the node via the shipped scripts, probe Traefik and psinode over HTTPS, and tear down again — run:
+
+```bash
+CI_ADMIN_PASSWORD="$(openssl rand -base64 24)" .ci/bring-up.sh
+```
+
+Docker is the only prerequisite. Expect roughly 5–15 minutes on a typical machine (image pull, two start cycles, and bounded readiness polling). The check uses an isolated Compose project (`psibase-node-ci`) and refuses to run if `.ci/assert-isolated.sh` cannot prove it will not touch a live node's volumes or networks.
+
+The same bring-up check runs in CI on every pull request and on pushes to `main`.
+
+Bring-up's most important assertion is that `psinode-entrypoint.sh` picks the right branch — a node coming up for the first time must not reach for peers. To confirm that assertion can still fail, run:
+
+```bash
+.ci/entrypoint-mutation-check.sh
+```
+
+It inverts the entrypoint's first-run condition, runs bring-up against the mutated entrypoint, and expects the failure to name the branch it wanted and the arguments it found. Your `psinode-entrypoint.sh` is restored before the script exits.
 
 ## Setup
 
