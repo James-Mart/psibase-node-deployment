@@ -62,13 +62,21 @@ Intended to work like this
 sequenceDiagram
     participant Client
     participant Traefik
+    participant Authelia
     participant Psinode
 
-    Client->>Traefik: GET x-admin.host (may include X-Auth-User)
-    Note over Traefik: strip-auth-header removes X-Auth-User
-    Note over Traefik: admin-auth validates basic auth
-    Note over Traefik: admin-auth adds X-Auth-User = authenticated_user
-    Traefik->>Psinode: Request with X-Auth-User header
-    Note over Psinode: PSIBASE_USERNAME_FIELD=X-Auth-User
+    Client->>Traefik: GET x-admin.host (may include Remote-User)
+    Note over Traefik: strip-auth-header blanks Remote-User and X-Auth-User
+    Traefik->>Authelia: forwardAuth (HOST-scoped session cookie)
+    alt no session
+        Authelia-->>Traefik: redirect to x-auth.host
+        Traefik-->>Client: 302 to portal
+        Note over Client,Authelia: operator logs in; Authelia sets HOST-scoped session cookie
+        Client->>Traefik: GET x-admin.host (session cookie)
+        Traefik->>Authelia: forwardAuth
+    end
+    Authelia-->>Traefik: 200 + Remote-User
+    Traefik->>Psinode: Request with Remote-User header
+    Note over Psinode: PSIBASE_USERNAME_FIELD=Remote-User
     Psinode->>Client: Response
 ```

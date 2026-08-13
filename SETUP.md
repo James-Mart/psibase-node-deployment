@@ -123,7 +123,7 @@ flush        = on
 - **(Re)Starting the node**: `.scripts/restart-node.sh`
 - **Stopping the node**: `.scripts/stop-node.sh`
 - **Viewing psinode server logs**: `.scripts/show-logs.sh`
-- **Accessing admin dashboard**: Visit `https://x-admin.{HOST}`
+- **Accessing admin dashboard**: Visit `https://x-admin.{HOST}` (first login redirects through the Authelia portal at `https://x-auth.{HOST}`)
 - **Disk usage analysis**: Visit `https://x-disk.{HOST}`
 
 ## Updating psinode
