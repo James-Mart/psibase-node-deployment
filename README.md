@@ -168,4 +168,4 @@ The deployment uses Docker volumes for persistent data:
 
 ## Setup
 
-See [SETUP.md](./SETUP.md).
+See [SETUP.md](./SETUP.md). Operators already running a node and upgrading from HTTP Basic auth should follow [Migrating to Authelia session auth](./SETUP.md#migrating-to-authelia-session-auth).
