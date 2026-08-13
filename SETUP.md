@@ -157,6 +157,8 @@ For operators already running a node on an older revision of this repository (HT
 
 5. **Log in** at `https://x-auth.${HOST}` (use your domain in place of `${HOST}`). After that, every `x-*` tool shares that session.
 
+The **Peers** panel in `x-admin` still needs a psinode build that includes psibase#1987 and a node-local package upgrade — see [Updating psinode](#updating-psinode). That is separate from this auth migration and does not wipe chain data.
+
 **Auth posture.** A single password guards all admin surfaces — the same one-factor protection Basic gave you, now as a domain-scoped session. Authelia supports TOTP as a second factor; this deployment deliberately enables password-only login. For TOTP, see [Authelia's time-based one-time password documentation](https://www.authelia.com/configuration/second-factor/time-based-one-time-password/) rather than enabling it here without understanding the change.
 
 **Sessions.** Authelia keeps its identity database on disk, but without Redis, active sessions live in the Authelia process. Restarting Authelia (for example when you run `.scripts/restart-node.sh`) ends them — log in again at `https://x-auth.${HOST}`.
@@ -168,6 +170,30 @@ For operators already running a node on an older revision of this repository (HT
 Changing `PSINODE_IMAGE` in `.env` and redeploying the compose file is likely insufficient. It will work for backwards compatible updates, but not for new major versions because the psinode database is not automatically cleared.
 
 To update and reset the database, you have to bring down compose, delete the volumes related to the psinode database, and then restart compose (with an updated `PSINODE_IMAGE`).
+
+### Peers panel: psinode version and node-local packages
+
+The **Peers** panel in `x-admin` calls `x-peers` from the browser. That only works if the node is running a psinode build that includes [psibase#1987](https://github.com/gofractally/psibase/pull/1987), merged 2026-08-10.
+
+No release includes that yet. The newest published tag is `v0.25.0-pre` (2026-08-05), which predates the merge. Watch [psibase releases](https://github.com/gofractally/psibase/releases) after that date and set `PSINODE_IMAGE` to a tag that contains the fix — do not assume a version that does not exist.
+
+`XAdmin` and `XPeers` are node-local `.psi` packages stored in the psinode database. Changing the image does not replace packages already installed on an existing volume. After the node is running a build that includes the fix, upgrade those packages without wiping chain data:
+
+1. Open `https://x-admin.{HOST}` (sign in at `https://x-auth.{HOST}` first if you have not already).
+2. Open the **Packages** tab.
+3. Update the node-local packages that show an update.
+
+CLI alternative, from this repository on the server, **inside** the psinode container:
+
+```bash
+docker compose exec psinode psibase upgrade --local
+```
+
+Run it there, not from the host. `psibase upgrade --local` pushes packages to local service subdomains. Those hosts now sit behind the Authelia perimeter, so from the host the CLI would need a portal session. Inside the container it reaches psinode over loopback, which psinode already trusts.
+
+Once the packages are updated, open the **Peers** panel in `x-admin`. It should list peers, and adding or disconnecting one should succeed.
+
+If every other `x-*` surface works but the peers panel alone fails with a CORS or network error in the browser console, that is the packages, not the perimeter — see [Peers panel fails with a CORS or network error](./TROUBLESHOOTING.md#peers-panel-fails-with-a-cors-or-network-error).
 
 ## Restarting psinode
 

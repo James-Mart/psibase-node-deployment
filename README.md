@@ -168,4 +168,4 @@ The deployment uses Docker volumes for persistent data:
 
 ## Setup
 
-See [SETUP.md](./SETUP.md). Operators already running a node and upgrading from HTTP Basic auth should follow [Migrating to Authelia session auth](./SETUP.md#migrating-to-authelia-session-auth).
+See [SETUP.md](./SETUP.md). Operators already running a node and upgrading from HTTP Basic auth should follow [Migrating to Authelia session auth](./SETUP.md#migrating-to-authelia-session-auth). The `x-admin` peers panel also needs a psinode build that includes psibase#1987 and a node-local package upgrade — see [Updating psinode](./SETUP.md#updating-psinode).

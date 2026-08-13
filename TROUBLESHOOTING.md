@@ -37,6 +37,20 @@ rm traefik/config/logs.yml
 After Authelia is healthy again, `https://x-logs.{HOST}` should redirect to the
 portal at `https://x-auth.{HOST}` instead of prompting for Basic auth.
 
+## Peers panel fails with a CORS or network error
+
+If every other `x-*` surface works after you sign in, but the **Peers** panel
+in `x-admin` alone fails with a CORS or network error in the browser console,
+the Authelia perimeter is fine. The node-local packages predate
+[psibase#1987](https://github.com/gofractally/psibase/pull/1987): an older
+`XPeers` checks authorization before it answers the CORS preflight and returns
+401 without CORS headers, which the browser reports as a CORS or network error.
+
+This is not a proxy or login problem. Upgrade the node-local packages once the
+node is running a psinode build that includes that fix — see
+[Updating psinode](./SETUP.md#updating-psinode). Until a release contains it, no
+published image includes the fix.
+
 ## No HSM detected
 
 This error typically means that you did the following:
