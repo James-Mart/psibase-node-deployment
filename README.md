@@ -154,6 +154,7 @@ Traefik currently manages the following routes:
 
 - HTTPS encryption using Let's Encrypt with Cloudflare DNS verification
 - Single Authelia session perimeter for all `x-*` admin surfaces; if Authelia is missing or down, Traefik fails closed (502) rather than serving them
+- CORS preflight `OPTIONS` to psinode-served `x-*` hosts (for example `x-peers.{HOST}`) bypass Authelia session checks so the request reaches psinode; this deployment's own tool hosts (`x-auth`, `x-traefik`, `x-logs`, `x-disk`) and all non-`OPTIONS` requests still require a session. Bypassing Authelia authorizes nothing: psinode still applies its own `checkAuth`, so a service that pre-handles `OPTIONS` answers with CORS headers and an empty body, and one that does not answers its own 401. Those CORS headers come back only when `Origin` is HTTPS and matches `x-admin.{HOST}`, and no reply depends on the request target, so a bare `curl` gets nothing usable and no way to enumerate paths
 - Security headers for all HTTP responses
 - SoftHSM2 for secure key management
 - Automatic HTTP to HTTPS redirection
