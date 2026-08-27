@@ -7,6 +7,7 @@ http:
         stsPreload: true
         stsSeconds: 63072000
     
+    # P2P-only: attach to x-peers-p2p, not the public psinode router.
     psinode-headers:
       headers:
         customRequestHeaders:
