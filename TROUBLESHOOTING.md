@@ -39,7 +39,13 @@ portal at `https://x-auth.{HOST}` instead of prompting for Basic auth.
 
 ## P2P handshake redirected to x-auth
 
-If `GET https://x-peers.{HOST}/p2p` returns **302** to `https://x-auth.{HOST}`, Authelia is still gating the handshake. That path should bypass Authelia (only `GET /p2p` on `x-peers.{HOST}`; not `/connect`, `/graphql`, or other `x-*` hosts). Confirm `authelia/configuration.yml` has the bypass rule before the psinode-served `x-*` `one_factor` catch-all, and that Traefik routes that request through `admin-auth` with request header `Connection: Upgrade`.
+If `GET https://x-peers.{HOST}/p2p` returns **302** to `https://x-auth.{HOST}`, Authelia is still gating the handshake. That path should bypass Authelia (only `GET /p2p` on `x-peers.{HOST}`; not `/connect`, `/graphql`, or other `x-*` hosts). Confirm `authelia/configuration.yml` has the bypass rule before the psinode-served `x-*` `one_factor` catch-all, and that Traefik routes that request through `admin-auth` with request header `Connection: Upgrade`. The `psinode-headers` middleware sets that header; see the comment on its definition in `traefik/config/middlewares.yml` for where it may be attached.
+
+## Public site hangs while the node looks healthy
+
+If `https://{HOST}` times out while psinode logs look healthy, Traefik WARN logs still look fine, and `:80`, `:443`, Authelia, and Dozzle still answer, Traefik may be holding backend connections open because `Connection: Upgrade` is attached to the public `psinode` router.
+
+Confirm in `traefik/config/routers.yml` that the `psinode` router does **not** list `psinode-headers`. That middleware belongs on `x-peers-p2p` only (see `traefik/config/middlewares.yml`).
 
 ## Peers panel fails with a CORS or network error
 
