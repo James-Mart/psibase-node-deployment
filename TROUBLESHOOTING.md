@@ -111,6 +111,8 @@ coredumpctl clean <days>
 
 ### Initial Authentication
 
+This sequence is for **`x-*` admin routes** (for example `x-admin.{HOST}`). Public psinode routes (`{HOST}` and non-`x-*` `*.{HOST}`) do not run Authelia forward-auth; Traefik strips the `Cookie` header before psinode sees the request even though the browser may still send the `HOST`-scoped session cookie to Traefik.
+
 Intended to work like this 
 
 ```mermaid

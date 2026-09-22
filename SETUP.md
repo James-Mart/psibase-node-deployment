@@ -164,9 +164,13 @@ For operators already running a node on an older revision of this repository (HT
 
 The **Peers** panel in `x-admin` still needs a psinode build that includes psibase#1987 and a node-local package upgrade — see [Updating psinode](#updating-psinode). That is separate from this auth migration and does not wipe chain data.
 
-**Auth posture.** A single password guards all admin surfaces — the same one-factor protection Basic gave you, now as a domain-scoped session. Authelia supports TOTP as a second factor; this deployment deliberately enables password-only login. For TOTP, see [Authelia's time-based one-time password documentation](https://www.authelia.com/configuration/second-factor/time-based-one-time-password/) rather than enabling it here without understanding the change.
+**Auth posture.** A single password guards all admin surfaces — the same one-factor protection Basic gave you, now as a `HOST`-scoped session cookie so one login covers every `x-*` tool. Authelia supports TOTP as a second factor; this deployment deliberately enables password-only login. For TOTP, see [Authelia's time-based one-time password documentation](https://www.authelia.com/configuration/second-factor/time-based-one-time-password/) rather than enabling it here without understanding the change.
 
 **Sessions.** Authelia keeps its identity database on disk, but without Redis, active sessions live in the Authelia process. Restarting Authelia (for example when you run `.scripts/restart-node.sh`) ends them — log in again at `https://x-auth.${HOST}`.
+
+The session cookie stays scoped to `HOST` so SSO works across sibling `x-*` hosts. Your browser still sends it on public psinode routes (`{HOST}` and non-`x-*` `*.{HOST}`), but Traefik's `strip-cookie-header` middleware removes the `Cookie` header before those requests reach psinode — the same pattern as `strip-auth-header` for spoofable identity headers. Authenticated `x-*` routes keep the cookie so forward-auth still works.
+
+Pulling a repository update that adds the public-host cookie drop does **not** require rotating `AUTHELIA_SESSION_SECRET`, restarting Authelia for that reason, or re-logging everyone out. First-time setup above still generates that secret once per deployment.
 
 **Credential rotation.** Re-run `./.setup/setup-admin-auth.sh` with the same username and restart — see [Provision admin authentication credentials](#provision-admin-authentication-credentials).
 
