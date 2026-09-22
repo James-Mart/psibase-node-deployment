@@ -23,6 +23,11 @@ http:
           X-Auth-User: ""
           Remote-User: ""
 
+    strip-cookie-header:
+      headers:
+        customRequestHeaders:
+          Cookie: ""
+
     admin-auth:
       forwardAuth:
         address: 'http://authelia:9091/api/authz/forward-auth'
