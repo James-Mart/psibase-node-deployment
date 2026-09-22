@@ -16,7 +16,6 @@ http:
         - security-headers
         - strip-auth-header
         - strip-cookie-header
-        - psinode-headers
         - psinode-rewrite
       tls: *tlsCommon
 
