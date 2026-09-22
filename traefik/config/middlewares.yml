@@ -23,6 +23,12 @@ http:
           X-Auth-User: ""
           Remote-User: ""
 
+    # Drops only authelia_session. Other cookies on the request still forward.
+    strip-authelia-session:
+      plugin:
+        stripAutheliaSession:
+          cookieName: authelia_session
+
     admin-auth:
       forwardAuth:
         address: 'http://authelia:9091/api/authz/forward-auth'

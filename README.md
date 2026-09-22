@@ -86,10 +86,11 @@ The deployment currently consists of three main services:
    - Routes traffic to appropriate services
    - Provides dashboard access for monitoring
    - Enforces security headers and the Authelia session for protected apps (x-admin, x-traefik, etc.)
+   - Strips spoofable identity headers on public psinode routes (`{HOST}` and non-`x-*` `*.{HOST}`) before requests reach psinode, and removes only the `authelia_session` cookie from those requests so other cookies still reach psinode
 
 3. **authelia**:
    - Login portal at `x-auth.{HOST}`
-   - Domain-scoped session that is the perimeter for all `x-*` admin surfaces
+   - `HOST`-scoped session cookie so one login covers all `x-*` admin surfaces; Traefik forward-auth on those routes still receives the cookie
    - Mandatory; Traefik fails closed (502) if Authelia is missing or down
 
 ## File Structure
@@ -117,6 +118,7 @@ The deployment currently consists of three main services:
 │   ├── config/                # Traefik dynamic routing and middleware configuration
 │   │   ├── middlewares.yml    # Traefik middleware configuration
 │   │   └── routers.yml        # Traefik routing rules
+│   ├── plugins-local/         # In-repo plugin that removes only authelia_session
 │   └── traefik.yml            # Main Traefik static configuration
 ├── .env.template              # Template for environment variables
 ├── .gitignore                 # Git ignore file
@@ -144,8 +146,8 @@ The deployment sets up the following network endpoints:
 
 Traefik currently manages the following routes:
 
-- `{HOST}`: Main access to the Psibase node
-- `*.{HOST}`: Subdomains routed to the Psibase node (except admin subdomains)
+- `{HOST}`: Main access to the Psibase node (Traefik removes only `authelia_session`; other cookies still reach psinode)
+- `*.{HOST}`: Subdomains routed to the Psibase node, except `x-*` admin hosts (Traefik removes only `authelia_session`; other cookies still reach psinode)
 - `x-auth.{HOST}`: Authelia login portal
 - `x-admin.{HOST}`: Admin interface for the node (Authelia session)
 - `x-traefik.{HOST}`: Traefik dashboard (Authelia session)
@@ -154,6 +156,7 @@ Traefik currently manages the following routes:
 
 - HTTPS encryption using Let's Encrypt with Cloudflare DNS verification
 - Single Authelia session perimeter for all `x-*` admin surfaces; if Authelia is missing or down, Traefik fails closed (502) rather than serving them
+- `HOST`-scoped Authelia session cookie for SSO across `x-*` admin surfaces. The browser still sends that cookie on public psinode hosts, but Traefik's `strip-authelia-session` middleware removes only `authelia_session` before psinode sees the request. Other cookies still reach psinode, so published apps cannot read the session token
 - CORS preflight `OPTIONS` to psinode-served `x-*` hosts (for example `x-peers.{HOST}`) and node-to-node P2P handshake `GET /p2p` on `x-peers.{HOST}` only bypass Authelia session checks so the request reaches psinode; this deployment's own tool hosts (`x-auth`, `x-traefik`, `x-logs`, `x-disk`) and all other requests on psinode-served `x-*` hosts — including the logged-in **Peers** panel on `x-peers.{HOST}` (`/connect`, `/graphql`) — still require a session. Bypassing Authelia authorizes nothing: psinode still applies its own auth (`checkAuth` for `OPTIONS`; `checkP2PAuth` for `/p2p`), so a service that pre-handles `OPTIONS` answers with CORS headers and an empty body, and one that does not answers its own 401. Those CORS headers come back only when `Origin` is HTTPS and matches `x-admin.{HOST}`, and no reply depends on the request target, so a bare `curl` gets nothing usable and no way to enumerate paths
 - Security headers for all HTTP responses
 - SoftHSM2 for secure key management

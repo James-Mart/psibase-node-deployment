@@ -1,0 +1,9 @@
+displayName: Strip Authelia Session
+type: middleware
+
+import: github.com/psibase/strip-authelia-session
+
+summary: Remove only the authelia_session cookie from the request Cookie header.
+
+testData:
+  cookieName: authelia_session

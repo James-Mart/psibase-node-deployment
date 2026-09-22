@@ -1,6 +1,8 @@
 services:
   reverse-proxy:
     image: traefik:v3.3
+    # Traefik resolves ./plugins-local from the process working directory.
+    working_dir: /
     ports:
       - "80:80"
       - "443:443"
@@ -14,6 +16,7 @@ services:
       - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
       - "./traefik/config:/etc/traefik/config:ro"
       - "./traefik/auth:/etc/traefik/auth:ro"
+      - "./traefik/plugins-local:/plugins-local:ro"
     logging:
       driver: "json-file"
       options:
