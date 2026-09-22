@@ -15,7 +15,7 @@ http:
       middlewares:
         - security-headers
         - strip-auth-header
-        - strip-cookie-header
+        - strip-authelia-session
         - psinode-rewrite
       tls: *tlsCommon
 

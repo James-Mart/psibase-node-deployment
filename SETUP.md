@@ -168,9 +168,9 @@ The **Peers** panel in `x-admin` still needs a psinode build that includes psiba
 
 **Sessions.** Authelia keeps its identity database on disk, but without Redis, active sessions live in the Authelia process. Restarting Authelia (for example when you run `.scripts/restart-node.sh`) ends them — log in again at `https://x-auth.${HOST}`.
 
-The session cookie stays scoped to `HOST` so SSO works across sibling `x-*` hosts. Your browser still sends it on public psinode routes (`{HOST}` and non-`x-*` `*.{HOST}`), but Traefik's `strip-cookie-header` middleware removes the `Cookie` header before those requests reach psinode — the same pattern as `strip-auth-header` for spoofable identity headers. Authenticated `x-*` routes keep the cookie so forward-auth still works.
+The session cookie stays scoped to `HOST` so SSO works across sibling `x-*` hosts. Your browser still sends it on public psinode routes (`{HOST}` and non-`x-*` `*.{HOST}`), but Traefik's `strip-authelia-session` middleware removes only the `authelia_session` cookie before those requests reach psinode. Other cookies still reach psinode. Authenticated `x-*` routes keep the session cookie so forward-auth still works.
 
-Pulling a repository update that adds the public-host cookie drop does **not** require rotating `AUTHELIA_SESSION_SECRET`, restarting Authelia for that reason, or re-logging everyone out. First-time setup above still generates that secret once per deployment.
+Pulling a repository update that drops `authelia_session` on public hosts does **not** require rotating `AUTHELIA_SESSION_SECRET`, restarting Authelia for that reason, or re-logging everyone out. First-time setup above still generates that secret once per deployment.
 
 **Credential rotation.** Re-run `./.setup/setup-admin-auth.sh` with the same username and restart — see [Provision admin authentication credentials](#provision-admin-authentication-credentials).
 

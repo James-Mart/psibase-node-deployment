@@ -33,6 +33,12 @@ http:
       default:
         minVersion: "VersionTLS13"
 
+# In-repo plugin. Traefik loads it from /plugins-local and does not download it.
+experimental:
+  localPlugins:
+    stripAutheliaSession:
+      moduleName: github.com/psibase/strip-authelia-session
+
 certificatesResolvers:
   cloudflare:
     acme:
