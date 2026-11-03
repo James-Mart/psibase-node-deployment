@@ -5,6 +5,9 @@ traefik/acme/
 # Authelia credentials
 authelia/users_database.yml
 
+# Keys
+*.pem
+
 # Environment variables
 .env
 
