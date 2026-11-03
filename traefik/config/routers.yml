@@ -7,7 +7,7 @@ tlsCommon: &tlsCommon
 http:
   routers:
     psinode:
-      rule: Host(`{{ env "HOST" }}`) || (HostRegexp(`^.+\.{{ env "HOST" }}$`) && !HostRegexp(`^x-(admin|peers|traefik|logs|disk|auth)\.{{ env "HOST" }}$`))
+      rule: Host(`{{ env "HOST" }}`) || (HostRegexp(`^.+\.{{ env "HOST" }}$`) && !HostRegexp(`^x-(admin|peers|packages|http|proxy|traefik|logs|disk|auth)\.{{ env "HOST" }}$`))
       service: "psinode"
       entryPoints:
         - web
@@ -33,10 +33,24 @@ http:
       tls: *tlsCommon
 
     x-services:
-      rule: HostRegexp(`^x-(admin|peers)\.{{ env "HOST" }}$`) && !Host(`x-traefik.{{ env "HOST" }}`) && !Host(`x-logs.{{ env "HOST" }}`) && !Host(`x-disk.{{ env "HOST" }}`) && !Host(`x-auth.{{ env "HOST" }}`)
+      rule: HostRegexp(`^x-(admin|peers|packages|http|proxy)\.{{ env "HOST" }}$`)
       service: "psinode"
       entryPoints:
         - websecure
+      middlewares:
+        - security-headers
+        - strip-auth-header
+        - admin-auth
+      tls: *tlsCommon
+
+    # x-admin uploads package files to each service's own host, and those uploads
+    # must carry the operator's Authelia identity even when that host is public.
+    x-admin-writes:
+      rule: HostRegexp(`^x-.+\.{{ env "HOST" }}$`) && (Method(`PUT`) || Method(`DELETE`)) && Header(`Origin`, `https://x-admin.{{ env "HOST" }}`)
+      service: "psinode"
+      entryPoints:
+        - websecure
+      priority: 1000
       middlewares:
         - security-headers
         - strip-auth-header
