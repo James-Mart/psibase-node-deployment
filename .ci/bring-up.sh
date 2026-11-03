@@ -18,6 +18,8 @@ source "$SCRIPT_DIR/lib/entrypoint-branch-assert.sh"
 
 ENV_CI="$SCRIPT_DIR/.env.ci"
 READY_TIMEOUT=180
+# Traefik forward-auth returns 500 until Authelia accepts connections.
+AUTH_NOT_READY_500_TIMEOUT=10
 NOT_FOUND_GRACE=15
 ACME_TIMEOUT=60
 # Must match HTTPS_PROXY in docker-compose.ci.yml.
@@ -288,6 +290,7 @@ assert_http_301() {
 
 assert_x_auth_redirect() {
   local deadline=$((SECONDS + READY_TIMEOUT))
+  local not_ready_deadline=$((SECONDS + AUTH_NOT_READY_500_TIMEOUT))
   local code location
   echo "Asserting https://${X_HOST}/ redirects to x-auth..."
   while ((SECONDS < deadline)); do
@@ -297,6 +300,13 @@ assert_x_auth_redirect() {
     if [[ "$code" == "502" || "$code" == "503" ]]; then
       sleep 2
       continue
+    fi
+    if [[ "$code" == "500" ]]; then
+      if ((SECONDS < not_ready_deadline)); then
+        sleep 2
+        continue
+      fi
+      die "x-* assertion failed: still 500 after ${AUTH_NOT_READY_500_TIMEOUT}s (Authelia not ready)"
     fi
     if [[ "$code" == "302" ]] && [[ "$location" == *"x-auth.${HOST}"* ]]; then
       echo "x-* ok (302 ${location})"
@@ -309,6 +319,7 @@ assert_x_auth_redirect() {
 
 assert_x_peers_p2p_ungated() {
   local deadline=$((SECONDS + READY_TIMEOUT))
+  local not_ready_deadline=$((SECONDS + AUTH_NOT_READY_500_TIMEOUT))
   local code location
   echo "Asserting https://${X_PEERS_HOST}/p2p is not redirected to x-auth..."
   while ((SECONDS < deadline)); do
@@ -318,6 +329,13 @@ assert_x_peers_p2p_ungated() {
     if [[ "$code" == "502" || "$code" == "503" ]]; then
       sleep 2
       continue
+    fi
+    if [[ "$code" == "500" ]]; then
+      if ((SECONDS < not_ready_deadline)); then
+        sleep 2
+        continue
+      fi
+      die "x-peers /p2p assertion failed: still 500 after ${AUTH_NOT_READY_500_TIMEOUT}s (Authelia not ready)"
     fi
     if [[ "$code" == "302" ]] && [[ "$location" == *"x-auth.${HOST}"* ]]; then
       die "x-peers /p2p assertion failed: want not redirected to x-auth.${HOST}, got status=${code} location=${location}"
@@ -330,6 +348,7 @@ assert_x_peers_p2p_ungated() {
 
 assert_x_peers_graphql_gated() {
   local deadline=$((SECONDS + READY_TIMEOUT))
+  local not_ready_deadline=$((SECONDS + AUTH_NOT_READY_500_TIMEOUT))
   local code location
   echo "Asserting https://${X_PEERS_HOST}/graphql redirects to x-auth..."
   while ((SECONDS < deadline)); do
@@ -339,6 +358,13 @@ assert_x_peers_graphql_gated() {
     if [[ "$code" == "502" || "$code" == "503" ]]; then
       sleep 2
       continue
+    fi
+    if [[ "$code" == "500" ]]; then
+      if ((SECONDS < not_ready_deadline)); then
+        sleep 2
+        continue
+      fi
+      die "x-peers /graphql assertion failed: still 500 after ${AUTH_NOT_READY_500_TIMEOUT}s (Authelia not ready)"
     fi
     if [[ "$code" == "302" ]] && [[ "$location" == *"x-auth.${HOST}"* ]]; then
       echo "x-peers /graphql ok (302 ${location})"
