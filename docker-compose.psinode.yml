@@ -12,6 +12,7 @@ services:
       - PRODUCER_NAME=${PRODUCER_NAME}
       - HOST=${HOST}
       - DB_CACHE_SIZE=${DB_CACHE_SIZE}
+      - HTTP_TIMEOUT=${HTTP_TIMEOUT}
       - PSIBASE_ADMIN_IP=${PSIBASE_ADMIN_IP}
       - PSIBASE_USERNAME_FIELD=Remote-User
     volumes:

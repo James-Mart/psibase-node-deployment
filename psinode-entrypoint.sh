@@ -8,6 +8,7 @@ if [ ! -d "/root/psibase/db" ] || [ -z "$(ls -A /root/psibase/db)" ]; then
         -o "${HOST}" \
         -l 8090 \
         --database-cache-size="${DB_CACHE_SIZE}" \
+        --http-timeout="${HTTP_TIMEOUT}" \
         --pkcs11-module=/softhsm-lib/libsofthsm2.so
 else
     echo "Existing data found, resuming node"
@@ -16,5 +17,6 @@ else
         -o "${HOST}" \
         --p2p \
         -l 8090 \
-        --database-cache-size="${DB_CACHE_SIZE}"
+        --database-cache-size="${DB_CACHE_SIZE}" \
+        --http-timeout="${HTTP_TIMEOUT}"
 fi
