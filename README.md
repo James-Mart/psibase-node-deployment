@@ -126,6 +126,7 @@ The deployment currently consists of three main services:
 ├── docker-compose.proxy.yml   # Traefik proxy configuration
 ├── docker-compose.softhsm.yml # SoftHSM service configuration
 ├── docker-compose.yml         # Main Docker Compose file that includes other compose files
+├── load-psinode-image.sh      # Loads a psinode image from a gofractally/image-builders run
 ├── psinode-entrypoint.sh      # Custom entrypoint script for the psinode container
 ├── README.md                  # This file
 ├── SETUP.md                   # Documentation and setup instructions
@@ -204,6 +205,10 @@ Bring-up's most important assertion is that `psinode-entrypoint.sh` picks the ri
 ```
 
 It inverts the entrypoint's first-run condition, runs bring-up against the mutated entrypoint, and expects the failure to name the branch it wanted and the arguments it found. Your `psinode-entrypoint.sh` is restored before the script exits.
+
+## Loading a psinode image
+
+`./load-psinode-image.sh <run-id>` downloads the `psinode-<arch>-image` artifact from a [gofractally/image-builders](https://github.com/gofractally/image-builders/actions) run, checks its digest, and loads it into Docker. Set the printed `PSINODE_IMAGE` value in `.env`. Requires `gh` (authenticated), `docker`, and `python3`.
 
 ## Setup
 
